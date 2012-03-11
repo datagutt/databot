@@ -4,7 +4,7 @@ $conf = array(
 	"name" => "Kick bot",
 	"server" => "irc.freenode.net",
 	"prefix" => "!",
-	"channels" => array("#kicktest"),
+	"channels" => array("#kickfight"),
 	"owners" => array("owner" => "hostmask"),
 	"plugins" => array(
 		"Kickfight_Plugin" => "kickfight"
