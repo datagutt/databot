@@ -170,6 +170,9 @@ class Bot {
 						$this->triggerEvent("join", $passedVars);
 					break;
 					case "PART":
+						if(in_array($user, $this->users)){
+							unset($this->users[$user]);
+						}
 						$this->triggerEvent("part", $passedVars);
 					break;
 					case "PRIVMSG":
