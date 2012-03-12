@@ -117,7 +117,6 @@ class Bot {
 				list($user, $hostmask, $split, $command, $message, $channel) = "";
 				$size = sizeof($this->ex);
 				$hostmask = explode('!', $data);
-				var_dump($this->ex);
 				if(isset($hostmask[1])){
 					$hostmask = explode('@', $hostmask[1]);
 					if(isset($hostmask[1])){
@@ -134,7 +133,7 @@ class Bot {
 					// start of message
 					$message = $command = count($split) > 1 ? trim($split[1]) : "";
 					if($message == "VERSION"){
-						$this->send("NOTICE", "VERSION $user DataBot ".VERSION."");
+						$this->send("NOTICE", "VERSION $user DataBot :".VERSION."");
 					}
 				}
 				for($i = 4; isset($this->ex[$i]); $i++){
