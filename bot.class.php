@@ -11,7 +11,9 @@ class Bot {
 	public $owners = array();
 	public $nick = "Bot";
 	public $commands = array();
-	private $sock, $ex, $plugins = array(), $loadedPlugins = array();
+	private $sock, $ex, $plugins = array(), 
+		$loadedPlugins = array(), 
+		$users = array();
 	public function __construct($config){
 		$this->start_time = microtime(true);
 		foreach($config as $key => $setting){
@@ -164,6 +166,7 @@ class Bot {
 				}
 				switch($this->ex[1]){
 					case "JOIN":
+						$this->users[$user] = $user;
 						$this->triggerEvent("join", $passedVars);
 					break;
 					case "PART":
@@ -186,7 +189,16 @@ class Bot {
 						$this->triggerEvent("topic", $passedVars);
 					break;
 					case "KICK":
+						if(in_array($user, $this->users)){
+							unset($this->users[$user]);
+						}
 						$this->triggerEvent("kick", $passedVars);
+					break;
+					case "353":
+						$users = explode(':', $message);
+						foreach($users as $user){
+							$this->users[$user] = $user;
+						}
 					break;
 					default:
 						$this->triggerEvent($this->ex[1], $passedVars);
