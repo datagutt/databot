@@ -11,9 +11,9 @@ class Bot {
 	public $owners = array();
 	public $nick = "Bot";
 	public $commands = array();
+	public $users = array();
 	private $sock, $ex, $plugins = array(), 
-		$loadedPlugins = array(), 
-		$users = array();
+		$loadedPlugins = array();
 	public function __construct($config){
 		$this->start_time = microtime(true);
 		foreach($config as $key => $setting){
