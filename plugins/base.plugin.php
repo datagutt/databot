@@ -29,7 +29,7 @@ class Base_Plugin {
 				$i = 0;
 				foreach($this->irc->commands as $key => $command){
 					$msg .= $prefix.$command;
-					if($key && $i <= (count($this->irc->commands) - 1)){
+					if($key && $i < (count($this->irc->commands) - 1)){
 						$msg .= ", ";
 					}
 					$i++;

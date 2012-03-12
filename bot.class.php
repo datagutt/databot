@@ -174,6 +174,7 @@ class Bot {
 					break;
 					case "PRIVMSG":
 						if(!empty($command) && in_array($channel, $this->channels)){
+							// if theres a prefix at the start of the message, its a command
 							$c = substr($command, 0, strlen($this->prefix));
 							if($c == $this->prefix){
 								$this->triggerEvent("command", $passedVars);
@@ -189,16 +190,22 @@ class Bot {
 						$this->triggerEvent("topic", $passedVars);
 					break;
 					case "KICK":
+						// remove from users array
 						if(in_array($user, $this->users)){
 							unset($this->users[$user]);
 						}
 						$this->triggerEvent("kick", $passedVars);
 					break;
 					case "353":
-						$users = explode(':', $message);
+						$users = explode(" ", $message);
 						foreach($users as $user){
-							$this->users[$user] = $user;
+							$user = preg_replace("/^[^A-}]+/", "", $user);
+							// If nick is not the bots, put it in the users array
+							if($user !== $this->nick){
+								$this->users[$user] = $user;
+							}
 						}
+						print_r($this->users);
 					break;
 					default:
 						$this->triggerEvent($this->ex[1], $passedVars);
