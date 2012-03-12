@@ -205,7 +205,6 @@ class Bot {
 								$this->users[$user] = $user;
 							}
 						}
-						print_r($this->users);
 					break;
 					default:
 						$this->triggerEvent($this->ex[1], $passedVars);
