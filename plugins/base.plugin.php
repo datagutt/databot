@@ -30,7 +30,7 @@ class Base_Plugin {
 				$i = 0;
 				foreach($this->irc->commands as $key => $command){
 					// Owner only commands
-					if($key[0] == $this->irc->prefix && !$this->irc->isOwner($user, $hostmask)){
+					if($key[0] == "!" && !$this->irc->isOwner($user, $hostmask)){
 						continue;
 					}
 
