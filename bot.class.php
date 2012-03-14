@@ -13,21 +13,30 @@ class Bot {
 	public $commands = array();
 	public $users = array();
 	public $loop = 10;
+	public $debug = true;
 	private $sock, $ex, $loopcount, $plugins = array(), 
 		$loadedPlugins = array();
 	public function __construct($config){
+		$this->$this->logToDebug("Starting Databot…");
 		$this->start_time = microtime(true);
 		foreach($config as $key => $setting){
 			$this->$key = $setting;
 		}
+		$this->logToDebug("Loading plugins...");
 		$this->loadPlugins($this->plugins);
 	}
 	public function connect(){
 		if(!empty($this->server)){
 			$this->sock = fsockopen($this->server, $this->port);
 			stream_set_timeout($this->sock, 0, 100000);
+			echo "Connecting to server…";
 		}else{
 			throw new Exception("No server is defined");
+		}
+	}
+	public function logToDebug($line){
+		if($this->debug){
+			echo $line."\r\n";
 		}
 	}
 	public function disconnect(){
@@ -214,6 +223,7 @@ class Bot {
 							// add to users array
 							$this->users[$user] = $hostmask;
 						}
+						$this->logToDebug("[JOIN] $user joined $channel");
 						$this->triggerEvent("join", $passedVars);
 					break;
 					case "PART":
@@ -221,9 +231,12 @@ class Bot {
 						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
+						// Debug log
+						$this->logToDebug("[PART] $user parted $channel");
 						$this->triggerEvent("part", $passedVars);
 					break;
 					case "PRIVMSG":
+						$this->logToDebug("[MSG] $user said $message");
 						if(!empty($command) && in_array($channel, $this->channels)){
 							// if theres a prefix at the start of the message, its a command
 							$c = substr($command, 0, strlen($this->prefix));
@@ -238,6 +251,7 @@ class Bot {
 						$this->triggerEvent("mode", $passedVars);
 					break;
 					case "TOPIC":
+						$this->logToDebug("[KICK] Topic got changed to $message in $channel");
 						$this->triggerEvent("topic", $passedVars);
 					break;
 					case "KICK":
@@ -245,6 +259,7 @@ class Bot {
 						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
+						$this->logToDebug("[KICK] $user got kicked from $channel");
 						$this->triggerEvent("kick", $passedVars);
 					break;
 					// User list on joining channel
