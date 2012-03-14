@@ -5,7 +5,7 @@ $conf = array(
 	"server" => "irc.freenode.net",
 	"prefix" => "!",
 	"channels" => array("#kickfight"),
-	"owners" => array("nebkat" => "089-101-069109.ntlworld.ie"),
+	"owners" => array("nebkat" => "~nebkat@089-101-069109.ntlworld.ie"),
 	"plugins" => array(
 		"Kickfight_Plugin" => "kickfight"
 	)

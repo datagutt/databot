@@ -164,11 +164,8 @@ class Bot {
 				$size = sizeof($this->ex);
 				$hostmask = explode('!', $data);
 				if(isset($hostmask[1])){
-					$hostmask = explode('@', $hostmask[1]);
-					if(isset($hostmask[1])){
-						$hostmask = explode(' ', $hostmask[1]);
-						$hostmask = $hostmask[0];
-					}
+					$hostmask = explode(' ', $hostmask[1]);
+					$hostmask = $hostmask[0];
 				}
 				if(empty($hostmask) || is_array($hostmask)){
 					$hostmask = "";
@@ -263,11 +260,12 @@ class Bot {
 						break;
 					// User hosts
 					case "302":
-						$user = explode("=", $message);
-						$user = $user[0];
+						$userhost = explode("=", $message);
+						$user = $userhost[0];
 						if($user !== $this->nick){
-							$hostname = explode("@", $message);
-							$this->users[$user] = $hostname[1];
+							// Remove the +/- away status
+							$hostmask = substr($userhost[1], 1);
+							$this->users[$user] = $hostmask;
 						}
 					break;
 					default:
