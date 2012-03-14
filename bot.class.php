@@ -119,7 +119,7 @@ class Bot {
 		$this->send("MODE", "$channel -o $user");
 	}
 	public function isOwner($user, $hostname){
-		if(array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname){;
+		if(array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname){
 			return true;
 		}
 		return false;
