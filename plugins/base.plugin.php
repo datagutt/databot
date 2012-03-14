@@ -12,9 +12,10 @@ class Base_Plugin {
 			$this->irc->commands["help"] = "help";
 		}
 	}
-	public function onMode(/*$message, $command, $user, $channel, $hostmask*/){}
-	public function onJoin(/*$message, $command, $user, $channel, $hostmask*/){}
-	public function onPart(/*$message, $command, $user, $channel, $hostmask*/){}
+	public function onLoop(){}
+	public function onMode($message, $command, $user, $channel, $hostmask){}
+	public function onJoin($message, $command, $user, $channel, $hostmask){}
+	public function onPart($message, $command, $user, $channel, $hostmask){}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
 		$msg = "";
@@ -37,7 +38,7 @@ class Base_Plugin {
 			break;
 		}
 		if(!empty($msg)){
-			$this->irc->sendMessage($msg, $channel);
+			$this->irc->sendNotice($user, $msg);
 		}
 	}
 	public function onMessage(/*$message, $command, $user, $channel, $hostmask*/){}
