@@ -67,9 +67,6 @@ class Kickfight_Plugin extends Base_Plugin {
 				break;
 		}
 		switch($command){
-			case $prefix."test":
-				$this->irc->send("USERHOST", "nebkat");
-				break;
 			case $prefix."op":
 				// Only do checks for non-owners
 				if(!$this->irc->isOwner($user, $hostmask)) {
@@ -77,6 +74,11 @@ class Kickfight_Plugin extends Base_Plugin {
 					if(!$this->enabled){
 						$this->irc->sendMessage($channel, "$user: We have not started yet, idiot");
 						return;
+					}
+
+					// No need to op ourselves
+					if($user == $this->irc->nick){
+						$this->irc->sendMessage($channel, "$user: You can't op me, idiot");
 					}
 
 					// Banned user should not be allowed to op anyone
