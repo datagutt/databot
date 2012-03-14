@@ -35,7 +35,7 @@ class Bot {
 			$this->send("QUIT", ":Disconnected");
 			fclose($this->sock);
 		}else{
-			throw new Exception("Your not connected to a server!");
+			throw new Exception("Not connected to server");
 		}
 	}
 	public function loadPlugins($plugins){
@@ -81,7 +81,7 @@ class Bot {
 				
 			}
 		}else{
-			throw new Exception("Your not connected to a server!");
+			throw new Exception("Not connected to server");
 		}
 	}
 	public function send($action = "CTCP", $arg){
@@ -89,18 +89,20 @@ class Bot {
 			$output = "$action $arg\n";
 			fwrite($this->sock, $output);
 		}else{
-			throw new Exception("Your not connected to a server!");
+			throw new Exception("Not connected to server");
 		}
 	}
 	public function sendMessage($channel, $message = ""){
 		if(empty($message) || empty($channel)){
-			return;//throw new Exception("No message or channel given");
+			trigger_error("sendMessage: No message or channel given", E_WARNING);
+			return;
 		}
 		$this->send("PRIVMSG", "$channel :$message");
 	}
 	public function sendNotice($channel, $message = ""){
 		if(empty($message) || empty($channel)){
-			return;//throw new Exception("No message or channel given");
+			trigger_error("sendNotice: No message or channel given", E_WARNING);
+			return;
 		}
 		$this->send("NOTICE", "$channel :$message");
 	}		
