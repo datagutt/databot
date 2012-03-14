@@ -115,6 +115,15 @@ class Bot {
 	public function deop($channel, $user){
 		$this->send("MODE", "$channel -o $user");
 	}
+	public function voice($channel, $user){
+		$this->send("MODE", "$channel +v $user");
+	}
+	public function devoice($channel, $user){
+		$this->send("MODE", "$channel -v $user");
+	}
+	public function ban($channel, $hostmask){
+		$this->send("MODE", "$channel +b $hostmask");
+	}
 	public function isOwner($user, $hostname){
 		if(array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname){
 			return true;
