@@ -1,11 +1,11 @@
 <?php
 $conf = array(
-	"nick" => "KickerBot",
-	"name" => "Kick bot",
+	"nick" => "KickerBo2t",
+	"name" => "Kick bot2",
 	"server" => "irc.freenode.net",
 	"prefix" => "!",
 	"channels" => array("#kickfight"),
-	"owners" => array("owner" => "hostmask"),
+	"owners" => array("nebkat" => "089-101-069109.ntlworld.ie"),
 	"plugins" => array(
 		"Kickfight_Plugin" => "kickfight"
 	)

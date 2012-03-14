@@ -12,7 +12,8 @@ class Bot {
 	public $nick = "Bot";
 	public $commands = array();
 	public $users = array();
-	private $sock, $ex, $plugins = array(), 
+	public $loop = 10;
+	private $sock, $ex, $loopcount, $plugins = array(), 
 		$loadedPlugins = array();
 	public function __construct($config){
 		$this->start_time = microtime(true);
@@ -24,6 +25,7 @@ class Bot {
 	public function connect(){
 		if(!empty($this->server)){
 			$this->sock = fsockopen($this->server, $this->port);
+			stream_set_timeout($this->sock, 0, 100000);
 		}else{
 			throw new Exception("No server is defined");
 		}
@@ -90,11 +92,35 @@ class Bot {
 			throw new Exception("Your not connected to a server!");
 		}
 	}
-	public function sendMessage($message = "", $channel){
+	public function sendMessage($channel, $message = ""){
 		if(empty($message) || empty($channel)){
-			throw new Exception("No message or channel given");
+			return;//throw new Exception("No message or channel given");
 		}
 		$this->send("PRIVMSG", "$channel :$message");
+	}
+	public function sendNotice($channel, $message = ""){
+		if(empty($message) || empty($channel)){
+			return;//throw new Exception("No message or channel given");
+		}
+		$this->send("NOTICE", "$channel :$message");
+	}		
+	public function kick($channel, $user, $message = ""){
+		if($user == $this->nick) return;
+		$this->send("KICK", "$channel $user :$message");
+	}
+	public function op($channel, $user){
+		if($user == $this->nick) return;
+		$this->send("MODE", "$channel +o $user");
+	}
+	public function deop($channel, $user){
+		if($user == $this->nick) return;
+		$this->send("MODE", "$channel -o $user");
+	}
+	public function isOwner($user, $hostname){
+		if(array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname){;
+			return true;
+		}
+		return false;
 	}
 	public function joinChannels(){
 		foreach($this->channels as $channel){
@@ -113,8 +139,18 @@ class Bot {
 			$this->joinChannels();
 		}
 		while(!feof($this->sock)){
-			usleep(100000);
-			while($data = fgets($this->sock, 128)){
+			$this->loopcount++;
+			if($this->loop > 0 && ($this->loopcount % $this->loop == 0)){
+				$this->loopcount = 0;
+				foreach($this->plugins as $class => $plugin){
+					call_user_func(array($this->loadedPlugins[$class], "onLoop"));
+				}
+			}
+
+			$data = fgets($this->sock, 128);
+			if(empty($data)){
+				continue;
+			}else{
 				$this->ex = explode(" ", $data);
 				list($user, $hostmask, $split, $command, $message, $channel) = "";
 				$size = sizeof($this->ex);
@@ -162,15 +198,19 @@ class Bot {
 				}
 				//ugly 
 				if(!isset($this->ex[1])){
-					break;
+					continue;
 				}
 				switch($this->ex[1]){
 					case "JOIN":
-						$this->users[$user] = $user;
+						if($user !== $this->nick){
+							// add to users array
+							$this->users[$user] = $hostmask;
+						}
 						$this->triggerEvent("join", $passedVars);
 					break;
 					case "PART":
-						if(in_array($user, $this->users)){
+						// remove from users array
+						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
 						$this->triggerEvent("part", $passedVars);
@@ -194,19 +234,32 @@ class Bot {
 					break;
 					case "KICK":
 						// remove from users array
-						if(in_array($user, $this->users)){
+						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
 						$this->triggerEvent("kick", $passedVars);
 					break;
+					// User list on joining channel
 					case "353":
-						$users = explode(" ", $message);
+						$users = explode(":", $message);
+						$users = explode(" ", $users[1]);
 						foreach($users as $user){
 							$user = preg_replace("/^[^A-}]+/", "", $user);
-							// If nick is not the bots, put it in the users array
+							// Do not add ourselves
 							if($user !== $this->nick){
 								$this->users[$user] = $user;
+								// Send a request for the user host and catch it later
+								$this->send("USERHOST", $user);
 							}
+						}
+						break;
+					// User hosts
+					case "302":
+						$user = explode("=", $message);
+						$user = $user[0];
+						if($user !== $this->nick){
+							$hostname = explode("@", $message);
+							$this->users[$user] = $hostname[1];
 						}
 					break;
 					default:
