@@ -107,15 +107,12 @@ class Bot {
 		$this->send("NOTICE", "$channel :$message");
 	}		
 	public function kick($channel, $user, $message = ""){
-		if($user == $this->nick) return;
 		$this->send("KICK", "$channel $user :$message");
 	}
 	public function op($channel, $user){
-		if($user == $this->nick) return;
 		$this->send("MODE", "$channel +o $user");
 	}
 	public function deop($channel, $user){
-		if($user == $this->nick) return;
 		$this->send("MODE", "$channel -o $user");
 	}
 	public function isOwner($user, $hostname){
