@@ -93,18 +93,18 @@ class Bot {
 		}
 	}
 	public function sendMessage($target, $message = ""){
-		if(empty($message) || empty($channel)){
-			trigger_error("sendMessage: No message or target given", E_WARNING);
+		if(empty($message) || empty($target)){
+			trigger_error("sendMessage: No message or target given", E_USER_WARNING);
 			return;
 		}
 		$this->send("PRIVMSG", "$target :$message");
 	}
-	public function sendNotice($channel, $message = ""){
-		if(empty($message) || empty($channel)){
-			trigger_error("sendNotice: No message or channel given", E_WARNING);
+	public function sendNotice($target, $message = ""){
+		if(empty($message) || empty($target)){
+			trigger_error("sendNotice: No message or channel given", E_USER_WARNING);
 			return;
 		}
-		$this->send("NOTICE", "$channel :$message");
+		$this->send("NOTICE", "$target :$message");
 	}		
 	public function kick($channel, $user, $message = ""){
 		$this->send("KICK", "$channel $user :$message");
