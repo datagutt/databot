@@ -17,7 +17,7 @@ class Bot {
 	private $sock, $ex, $loopcount, $plugins = array(), 
 		$loadedPlugins = array();
 	public function __construct($config){
-		$this->$this->logToDebug("Starting Databot…");
+		$this->logToDebug("Starting Databot…");
 		$this->start_time = microtime(true);
 		foreach($config as $key => $setting){
 			$this->$key = $setting;
