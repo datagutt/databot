@@ -4,9 +4,9 @@ class Kickfight_Plugin extends Base_Plugin {
 	public $softBans = array();
 	public function setup(){
 		$this->irc->commands["op"] = "op";
-		$this->irc->commands["start"] = "start";
-		$this->irc->commands["stop"] = "stop";
-		$this->irc->commands["softban"] = "softban";
+		$this->irc->commands["!start"] = "start";
+		$this->irc->commands["!stop"] = "stop";
+		$this->irc->commands["!softban"] = "softban";
 	}
 
 	public function softBan($user, $time){

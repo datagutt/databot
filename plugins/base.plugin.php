@@ -29,6 +29,11 @@ class Base_Plugin {
 				$msg = "Available commands: ";
 				$i = 0;
 				foreach($this->irc->commands as $key => $command){
+					// Owner only commands
+					if($key[0] == "!" && !$this->irc->isOwner($user, $hostmask)){
+						continue;
+					}
+
 					$msg .= $prefix.$command;
 					if($key && $i < (count($this->irc->commands) - 1)){
 						$msg .= ", ";
@@ -38,7 +43,7 @@ class Base_Plugin {
 			break;
 		}
 		if(!empty($msg)){
-			$this->irc->sendMessage($user, $msg);
+			$this->irc->sendMessage($channel, $msg);
 		}
 	}
 	public function onMessage(/*$message, $command, $user, $channel, $hostmask*/){}
