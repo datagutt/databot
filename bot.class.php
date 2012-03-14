@@ -92,12 +92,12 @@ class Bot {
 			throw new Exception("Not connected to server");
 		}
 	}
-	public function sendMessage($channel, $message = ""){
+	public function sendMessage($target, $message = ""){
 		if(empty($message) || empty($channel)){
-			trigger_error("sendMessage: No message or channel given", E_WARNING);
+			trigger_error("sendMessage: No message or target given", E_WARNING);
 			return;
 		}
-		$this->send("PRIVMSG", "$channel :$message");
+		$this->send("PRIVMSG", "$target :$message");
 	}
 	public function sendNotice($channel, $message = ""){
 		if(empty($message) || empty($channel)){

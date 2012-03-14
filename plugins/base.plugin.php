@@ -38,7 +38,7 @@ class Base_Plugin {
 			break;
 		}
 		if(!empty($msg)){
-			$this->irc->sendNotice($user, $msg);
+			$this->irc->sendMessage($user, $msg);
 		}
 	}
 	public function onMessage(/*$message, $command, $user, $channel, $hostmask*/){}
