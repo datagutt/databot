@@ -1,5 +1,13 @@
 <?php
-define("VERSION", "0.2");
+define("VERSION", "0.3");
+
+// General bot logs
+define("LOG_LEVEL_BOT", 1);
+// General irc logs
+define("LOG_LEVEL_IRC", 2);
+// Events in channels
+define("LOG_LEVEL_CHAT", 3);
+
 class Bot {
 	public $start_time = 0;
 	public $server, 
@@ -13,30 +21,25 @@ class Bot {
 	public $commands = array();
 	public $users = array();
 	public $loop = 10;
-	public $debug = true;
-	private $sock, $ex, $loopcount, $plugins = array(), 
+	private $logLevel = LOG_LEVEL_IRC;
+	private $sock, $ex, $loopCount, $plugins = array(),
 		$loadedPlugins = array();
 	public function __construct($config){
-		$this->$this->logToDebug("Starting Databot…");
+		$this->log("Starting Databot...", LOG_LEVEL_BOT);
 		$this->start_time = microtime(true);
+		$this->log("Parsing config...", LOG_LEVEL_BOT);
 		foreach($config as $key => $setting){
 			$this->$key = $setting;
 		}
-		$this->logToDebug("Loading plugins...");
+		$this->log("Loading plugins...", LOG_LEVEL_BOT);
 		$this->loadPlugins($this->plugins);
 	}
-	public function connect(){
-		if(!empty($this->server)){
-			$this->sock = fsockopen($this->server, $this->port);
+	public function connect($server, $port){
+		if(!empty($server) && !empty($port)){
+			$this->sock = fsockopen($server, $port);
 			stream_set_timeout($this->sock, 0, 100000);
-			echo "Connecting to server…";
 		}else{
 			throw new Exception("No server is defined");
-		}
-	}
-	public function logToDebug($line){
-		if($this->debug){
-			echo $line."\r\n";
 		}
 	}
 	public function disconnect(){
@@ -45,6 +48,11 @@ class Bot {
 			fclose($this->sock);
 		}else{
 			throw new Exception("Not connected to server");
+		}
+	}
+	public function log($message, $level){
+		if($level <= $this->logLevel){
+			echo $message."\r\n";
 		}
 	}
 	public function loadPlugins($plugins){
@@ -114,7 +122,7 @@ class Bot {
 			return;
 		}
 		$this->send("NOTICE", "$target :$message");
-	}		
+	}
 	public function kick($channel, $user, $message = ""){
 		$this->send("KICK", "$channel $user :$message");
 	}
@@ -133,70 +141,89 @@ class Bot {
 	public function ban($channel, $hostmask){
 		$this->send("MODE", "$channel +b $hostmask");
 	}
-	public function isOwner($user, $hostname){
-		if(array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname){
-			return true;
-		}
-		return false;
+	public function unban($channel, $hostmask){
+		$this->send("MODE", "$channel -b $hostmask");
 	}
-	public function joinChannels(){
-		foreach($this->channels as $channel){
-			$this->send("JOIN", $channel);
-		}
+	public function join($channel){
+		$this->send("JOIN", $channel);
+	}
+	public function part($channel){
+		$this->send("PART", $channel);
+	}
+	public function isOwner($user, $hostname){
+		return array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname;
 	}
 	public function run(){
 		if(!$this->sock){
-			$this->connect();
+			$this->log("Connecting to server $this->server...", LOG_LEVEL_IRC);
+			$this->connect($this->server, $this->port);
 		}
 		$this->send("USER", "".$this->nick." Databot Databot :".$this->name."");
 		$this->send("NICK", $this->nick);
 		if(!empty($this->password)){
 			$this->send("NS", "IDENTIFY ".$this->password."");
 		}else{
-			$this->joinChannels();
+			foreach($this->channels as $channel){
+				$this->join($channel);
+			}
 		}
 		while(!feof($this->sock)){
-			$this->loopcount++;
-			if($this->loop > 0 && ($this->loopcount % $this->loop == 0)){
-				$this->loopcount = 0;
+			// Looping plugins
+			$this->loopCount++;
+			if($this->loop > 0 && ($this->loopCount % $this->loop == 0)){
+				$this->loopCount = 0;
 				foreach($this->plugins as $class => $plugin){
 					call_user_func(array($this->loadedPlugins[$class], "onLoop"));
 				}
 			}
 
-			$data = fgets($this->sock, 128);
+			// Read data
+			$data = fgets($this->sock, 256);
 			if(empty($data)){
 				continue;
 			}else{
+				// Trimming
+				if(substr($data, 0, 1) == ":"){
+					$data = substr($data, 1);
+				}
+				$data = trim($data);
+
 				$this->ex = explode(" ", $data);
-				list($user, $hostmask, $split, $command, $message, $channel) = "";
+				list($user, $hostmask, $hostname, $split, $command, $message, $channel) = "";
 				$size = sizeof($this->ex);
-				$hostmask = explode('!', $data);
+
+				// Hostmask
+				$hostmask = explode('!', $this->ex[0]);
 				if(isset($hostmask[1])){
-					$hostmask = explode(' ', $hostmask[1]);
-					$hostmask = $hostmask[0];
+					$hostmask = $hostmask[1];
 				}
 				if(empty($hostmask) || is_array($hostmask)){
-					$hostmask = "";
+					$hostmask = $this->ex[0];
+				}else{
+					$hostname = explode("@", $hostmask);
+					$hostname = $hostname[1];
 				}
-				$user = str_replace(":", "", strstr($this->ex[0], '!', true));
+
+				// User
+				$user = strstr($this->ex[0], '!', true);
+
+				// Message
 				if(isset($this->ex[3])){
 					$split = explode(':', $this->ex[3], 2);
 					// start of message
 					$message = $command = count($split) > 1 ? trim($split[1]) : "";
-					if($message == "VERSION"){
-						$this->send("NOTICE", "VERSION $user DataBot :".VERSION."");
-					}
-				}
-				for($i = 4; isset($this->ex[$i]); $i++){
-					if($i < $size){
+					for($i = 4; isset($this->ex[$i]); $i++){
 						$message .= " ";
+						$message .= $this->ex[$i];
 					}
-					$message .= $this->ex[$i];
 				}
+				$message = trim($message);
+
+				// Channel
 				if(isset($this->ex[2])){
 					$channel = str_replace(":", "", $this->ex[2]);
 				}
+
 				$passedVars = array(
 					"message" => $message,
 					"command" => $command,
@@ -208,38 +235,52 @@ class Bot {
 					$this->send("PONG", $this->ex[1]);
 				}
 				if((preg_match("/You are now identified|is now your displayed host|No such nick|password accepted -- you are now recognized/", $data))){
-					$this->joinChannels();
+					foreach($this->channels as $channel){
+						$this->join($channel);
+					}
 				}
 				//ugly 
 				if(!isset($this->ex[1])){
 					continue;
 				}
-				switch($this->ex[1]){
+				$event = $this->ex[1];
+				if(!empty($message) && substr($message, 0, 1) == chr(1) && substr($message, -1) == chr(1)){
+					$event = "CTCP";
+				}
+
+				switch($event){
 					case "JOIN":
-						if($user !== $this->nick){
-							// add to users array
+						// Do not add ourselves or services
+						if($user !== $this->nick && $hostname !== "services."){
+							// Add to users array
 							$this->users[$user] = $hostmask;
 						}
-						$this->logToDebug("[JOIN] $user joined $channel");
+						$this->log("[JOIN] $user joined $channel", LOG_LEVEL_CHAT);
 						$this->triggerEvent("join", $passedVars);
 					break;
 					case "PART":
-						// remove from users array
+						// Remove from users array
 						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
-						// Debug log
-						$this->logToDebug("[PART] $user parted $channel");
+						$this->log("[PART] $user parted $channel", LOG_LEVEL_CHAT);
 						$this->triggerEvent("part", $passedVars);
 					break;
+					case "CTCP":
+						$message = substr($message, 1, -1);
+						if($message == "VERSION"){
+							$this->sendNotice($user, "VERSION DataBot :".VERSION);
+						}
+						break;
 					case "PRIVMSG":
-						$this->logToDebug("[MSG] $user said $message");
 						if(!empty($command) && in_array($channel, $this->channels)){
-							// if theres a prefix at the start of the message, its a command
+							// If theres a prefix at the start of the message, its a command
 							$c = substr($command, 0, strlen($this->prefix));
 							if($c == $this->prefix){
+								$this->log("[CMD] $user: $message", LOG_LEVEL_CHAT);
 								$this->triggerEvent("command", $passedVars);
 							}else if(!empty($user)){
+								$this->log("[MSG] $user: $message", LOG_LEVEL_CHAT);
 								$this->triggerEvent("message", $passedVars);
 							}
 						}
@@ -248,15 +289,15 @@ class Bot {
 						$this->triggerEvent("mode", $passedVars);
 					break;
 					case "TOPIC":
-						$this->logToDebug("[KICK] Topic got changed to $message in $channel");
+						$this->log("[TOPIC] $channel topic set to $message by $user", LOG_LEVEL_CHAT);
 						$this->triggerEvent("topic", $passedVars);
 					break;
 					case "KICK":
-						// remove from users array
+						// Remove from users array
 						if(array_key_exists($user, $this->users)){
 							unset($this->users[$user]);
 						}
-						$this->logToDebug("[KICK] $user got kicked from $channel");
+						$this->log("[KICK] $user got kicked from $channel", LOG_LEVEL_CHAT);
 						$this->triggerEvent("kick", $passedVars);
 					break;
 					// User list on joining channel
@@ -280,7 +321,13 @@ class Bot {
 						if($user !== $this->nick){
 							// Remove the +/- away status
 							$hostmask = substr($userhost[1], 1);
+							$hostname = explode("@", $hostmask);
 							$this->users[$user] = $hostmask;
+
+							// Do not add services
+							if($hostname[1] == "services."){
+								unset($this->users[$user]);
+							}
 						}
 					break;
 					default:

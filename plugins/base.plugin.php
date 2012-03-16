@@ -21,21 +21,29 @@ class Base_Plugin {
 		$msg = "";
 		switch($command){
 			case $prefix."ping":
-				$running = (microtime(true) - $this->irc->start_time);
+				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
 				$msg = "DataBot version ".VERSION.", commit $commit. since $running s.";
 			break;
 			case $prefix."help":
 				$msg = "Available commands: ";
 				$i = 0;
+
+				$commands = array();
+
 				foreach($this->irc->commands as $key => $command){
 					// Owner only commands
 					if($key[0] == "!" && !$this->irc->isOwner($user, $hostmask)){
 						continue;
 					}
 
+					$commands[$key] = $command;
+				}
+
+				foreach($commands as $key => $command){
+
 					$msg .= $prefix.$command;
-					if($key && $i < (count($this->irc->commands) - 1)){
+					if($key && $i < (count($commands) - 1)){
 						$msg .= ", ";
 					}
 					$i++;

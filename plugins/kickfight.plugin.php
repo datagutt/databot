@@ -89,6 +89,13 @@ class Kickfight_Plugin extends Base_Plugin {
 
 					// Target user is not the command sender
 					if(is_array($argument) && !empty($argument[0]) && $argument[0] !== $user){
+						// Target user is not here
+						if(!array_key_exists($argument[0], $this->irc->users)){
+							$this->irc->sendMessage($channel, "$user: $argument[0] is not here, idiot");
+							return;
+						}
+
+						// Do not allow softban user op
 						if($this->isSoftBanned($argument[0])){
 							$this->irc->sendMessage($channel, "$user: $argument[0] is softbanned for another ".($this->softBans[$argument[0]] - time())." seconds");
 							return;
@@ -120,7 +127,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = true;
 				$this->irc->sendMessage($channel, "Starting KickFight!");
-				foreach($this->irc->users as $nick){
+				foreach($this->irc->users as $nick => $hostname){
 					if(!$this->isSoftBanned($nick)){
 						$this->irc->op($channel, $nick);
 					}
@@ -147,9 +154,21 @@ class Kickfight_Plugin extends Base_Plugin {
 						return;
 					}
 
+					// Do not ban yourself
+					if($argument[0] == $user){
+						$this->irc->sendMessage($channel, "$user: You can't ban yourself, master");
+						return;
+					}
+
 					// Target user is not here
 					if(!array_key_exists($argument[0], $this->irc->users)){
 						$this->irc->sendMessage($channel, "$user: $argument[0] is not here, master");
+						return;
+					}
+
+					// Do not ban owners
+					if($this->irc->isOwner($argument[0], $this->irc->users[$argument[0]])){
+						$this->irc->sendMessage($channel, "$user: You can't ban other owners, master");
 						return;
 					}
 
