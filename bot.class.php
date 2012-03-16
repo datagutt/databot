@@ -1,13 +1,17 @@
 <?php
 define("VERSION", "0.3");
-
+// Bot name used in VERSION (not nick)
+define("BOT", "Databot");
 // General bot logs
 define("LOG_LEVEL_BOT", 1);
 // General irc logs
 define("LOG_LEVEL_IRC", 2);
 // Events in channels
 define("LOG_LEVEL_CHAT", 3);
-
+// Commands
+define("COMMAND_LEVEL_GLOBAL", 1);
+define("COMMAND_LEVEL_MOD", 2);
+define("COMMAND_LEVEL_OWNER", 3);
 class Bot {
 	public $start_time = 0;
 	public $server, 
@@ -122,6 +126,22 @@ class Bot {
 			return;
 		}
 		$this->send("NOTICE", "$target :$message");
+	}
+	public function addCommand($command, $description, $usage, $level = COMMAND_LEVEL_GLOBAL){
+		$this->commands[$command]["description"] = $description;
+		$this->commands[$command]["usage"] = $usage;
+		$this->commands[$command]["level"] = $level;
+	}
+	public function getCommandUsage($command, $level = COMMAND_LEVEL_GLOBAL){
+		if($this->isCommand($command, $level)){
+			return "USAGE: ".$this->commands[$command]["usage"];
+		}
+	}
+	public function isCommand($command, $level = COMMAND_LEVEL_GLOBAL){
+		if(array_key_exists($command, $this->commands)){
+			return $this->commands[$command] == $level;
+		}
+		return false;
 	}
 	public function kick($channel, $user, $message = ""){
 		$this->send("KICK", "$channel $user :$message");
@@ -269,7 +289,7 @@ class Bot {
 					case "CTCP":
 						$message = substr($message, 1, -1);
 						if($message == "VERSION"){
-							$this->sendNotice($user, "VERSION DataBot :".VERSION);
+							$this->sendNotice($user, "VERSION ".BOT." :".VERSION);
 						}
 						break;
 					case "PRIVMSG":

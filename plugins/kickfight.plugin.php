@@ -3,10 +3,10 @@ class Kickfight_Plugin extends Base_Plugin {
 	public $enabled = false;
 	public $softBans = array();
 	public function setup(){
-		$this->irc->commands["op"] = "op";
-		$this->irc->commands["!start"] = "start";
-		$this->irc->commands["!stop"] = "stop";
-		$this->irc->commands["!softban"] = "softban";
+		$this->irc->addCommand("op", "Gives operator status to user", "[<user>]", COMMAND_LEVEL_GLOBAL);
+		$this->irc->addCommand("start", "Starts the kickfight", "", COMMAND_LEVEL_OWNER);
+		$this->irc->addCommand("stop", "Stops the kickfight", "", COMMAND_LEVEL_OWNER);
+		$this->irc->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", COMMAND_LEVEL_OWNER);
 	}
 
 	public function softBan($user, $time){
@@ -185,7 +185,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					$this->irc->deop($channel, $argument[0]);
 					$this->irc->sendMessage($channel, "User $argument[0] has been banned for $time seconds by $user");
 				}else{
-					$this->irc->sendMessage($channel, "$user: USAGE: softban <user> [<seconds>]");
+					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban"), COMMAND_LEVEL_GLOBAL);
 					return;
 				}
 				break;

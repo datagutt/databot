@@ -8,8 +8,8 @@ class Base_Plugin {
 		$this->setup();
 	}
 	public function setup(){
-		if(!in_array("help", $this->irc->commands)){
-			$this->irc->commands["help"] = "help";
+		if(!$this->irc->isCommand("help")){
+			$this->irc->addCommand("help", "Shows commands and how to use them", "[command]", COMMAND_LEVEL_GLOBAL);
 		}
 	}
 	public function onLoop(){}
@@ -23,26 +23,24 @@ class Base_Plugin {
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
-				$msg = "DataBot version ".VERSION.", commit $commit. since $running s.";
+				$msg = "".BOT." version ".VERSION.", commit $commit. since $running s.";
 			break;
 			case $prefix."help":
 				$msg = "Available commands: ";
 				$i = 0;
+				// this makes sure owner commands dont get shown. This needs a rewrite but it works for now
+				$commands = $this->irc->commands;
 
-				$commands = array();
-
-				foreach($this->irc->commands as $key => $command){
+				foreach($commands as $key => $command){
 					// Owner only commands
-					if($key[0] == "!" && !$this->irc->isOwner($user, $hostmask)){
-						continue;
+					$level = $this->irc->isOwner($user, $hostmask) ? COMMAND_LEVEL_OWNER : COMMAND_LEVEL_GLOBAL;
+					if($this->irc->isCommand($key, $level)){
+						unset($commands[$key]);
 					}
-
-					$commands[$key] = $command;
 				}
 
 				foreach($commands as $key => $command){
-
-					$msg .= $prefix.$command;
+					$msg .= $prefix.$key;
 					if($key && $i < (count($commands) - 1)){
 						$msg .= ", ";
 					}
