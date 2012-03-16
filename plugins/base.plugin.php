@@ -28,16 +28,16 @@ class Base_Plugin {
 			case $prefix."help":
 				$msg = "Available commands: ";
 				$i = 0;
-				// this makes sure owner commands dont get shown. This needs a rewrite but it works for now
+				// this makes sure owner commands dont get shown. This needs a rewrite because it doesnt work
 				$commands = $this->irc->commands;
 
-				foreach($commands as $key => $command){
+				/*foreach($commands as $key => $command){
 					// Owner only commands
 					$level = $this->irc->isOwner($user, $hostmask) ? COMMAND_LEVEL_OWNER : COMMAND_LEVEL_GLOBAL;
 					if($this->irc->isCommand($key, $level)){
 						unset($commands[$key]);
 					}
-				}
+				}*/
 
 				foreach($commands as $key => $command){
 					$msg .= $prefix.$key;

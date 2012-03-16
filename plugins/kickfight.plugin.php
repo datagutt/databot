@@ -185,7 +185,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					$this->irc->deop($channel, $argument[0]);
 					$this->irc->sendMessage($channel, "User $argument[0] has been banned for $time seconds by $user");
 				}else{
-					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban"), COMMAND_LEVEL_GLOBAL);
+					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban", COMMAND_LEVEL_GLOBAL));
 					return;
 				}
 				break;
