@@ -11,8 +11,8 @@ class CM_Plugin extends Base_Plugin {
 		// Devices
 		$this->addDevice("samsung", "galaxys2","GT-I9100", "http://get.cm/?device=galaxys2");
 		$this->addDevice("samsung", "galaxys","GT-I9000", "http://get.cm/?device=galaxysmtd");
-		$this->addDevice("samsung", "vibrant","vibrant", "http://get.cm/?device=vibrantmtd");
-		$this->addDevice("samsung", "crespo","crespo", "http://get.cm/?device=crespo");
+		$this->addDevice("samsung", "vibrant","SGH-T959", "http://get.cm/?device=vibrantmtd");
+		$this->addDevice("samsung", "crespo","GT-I9020", "http://get.cm/?device=crespo");
 		$this->addDevice("samsung", "maguro","GT-I9250", "http://get.cm/?device=maguro");
 		$this->addDevice("samsung", "toro","SCH-I515", "http://get.cm/?device=toro");
 		$this->addDevice("samsung", "captivate","SGH-I897", "http://get.cm/?device=captivatemtd");
