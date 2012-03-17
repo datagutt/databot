@@ -24,16 +24,6 @@ class OP_Plugin extends Base_Plugin {
 		$count = 1;
 		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
 		switch($command){
-			case "owners":
-			case "moderators":
-			break;
-			default:
-				if(!$this->irc->isOwner($user, $hostmask)){
-					return;
-				}
-			break;
-		}
-		switch($command){
 			case $prefix."op":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->op($channel, $argument[0]);
