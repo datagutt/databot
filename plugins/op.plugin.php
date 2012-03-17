@@ -1,13 +1,6 @@
 <?php
 class OP_Plugin extends Base_Plugin {
 	public function setup(){
-		$this->irc->commands["op"] = "op";
-		$this->irc->commands["deop"] = "deop";
-		$this->irc->commands["voice"] = "voice";
-		$this->irc->commands["devoice"] = "devoice";
-		$this->irc->commands["kick"] = "kick";
-		$this->irc->commands["kickban"] = "kickban";
-		$this->irc->commands["topic"] = "topic";
 		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_OWNER);
 		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_OWNER);
 		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_OWNER);
@@ -23,6 +16,11 @@ class OP_Plugin extends Base_Plugin {
 		$prefix = $this->irc->prefix;
 		$count = 1;
 		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
+		$userLevel = $this->irc->getUserLevel($user, $hostmask);
+
+		if(!$this->irc->isCommand(substr($command, 1), $userLevel)){
+			return;
+		}
 		switch($command){
 			case $prefix."op":
 				if(is_array($argument) && !empty($argument[0])){
