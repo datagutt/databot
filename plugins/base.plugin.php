@@ -9,13 +9,15 @@ class Base_Plugin {
 	}
 	public function setup(){
 		if(!$this->irc->isCommand("help")){
-			$this->irc->addCommand("help", "Shows commands and how to use them", "[command]", COMMAND_LEVEL_GLOBAL);
+			$this->irc->addCommand("help", "Shows commands and how to use them", "[command]", USER_LEVEL_GLOBAL);
 		}
 	}
 	public function onLoop(){}
+	public function onNick($user, $new, $hostmask){}
 	public function onMode($message, $command, $user, $channel, $hostmask){}
 	public function onJoin($message, $command, $user, $channel, $hostmask){}
 	public function onPart($message, $command, $user, $channel, $hostmask){}
+	public function onKick($message, $command, $user, $channel, $hostmask){}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
 		$msg = "";
@@ -23,33 +25,23 @@ class Base_Plugin {
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
-				$msg = "".BOT." version ".VERSION.", commit $commit. since $running s.";
+				$msg = BOT." version ".VERSION."; commit $commit; uptime ".$running."s.";
 			break;
 			case $prefix."help":
 				$msg = "Available commands: ";
-				$i = 0;
-				// this makes sure owner commands dont get shown. This needs a rewrite because it doesnt work
-				$commands = $this->irc->commands;
 
-				/*foreach($commands as $key => $command){
-					// Owner only commands
-					$level = $this->irc->isOwner($user, $hostmask) ? COMMAND_LEVEL_OWNER : COMMAND_LEVEL_GLOBAL;
-					if($this->irc->isCommand($key, $level)){
-						unset($commands[$key]);
-					}
-				}*/
+				$userLevel = $this->irc->getUserLevel($user, $hostmask);
 
-				foreach($commands as $key => $command){
-					$msg .= $prefix.$key;
-					if($key && $i < (count($commands) - 1)){
-						$msg .= ", ";
+				foreach($this->irc->commands as $command => $levels){
+					if($this->irc->isCommand($command, $userLevel)){
+						$msg .= $prefix.$command;
+						$msg .= " ";
 					}
-					$i++;
 				}
 			break;
 		}
 		if(!empty($msg)){
-			$this->irc->sendMessage($channel, $msg);
+			$this->irc->sendMessage($channel, $user.": ".$msg);
 		}
 	}
 	public function onMessage(/*$message, $command, $user, $channel, $hostmask*/){}

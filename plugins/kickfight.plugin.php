@@ -3,10 +3,11 @@ class Kickfight_Plugin extends Base_Plugin {
 	public $enabled = false;
 	public $softBans = array();
 	public function setup(){
-		$this->irc->addCommand("op", "Gives operator status to user", "[<user>]", COMMAND_LEVEL_GLOBAL);
-		$this->irc->addCommand("start", "Starts the kickfight", "", COMMAND_LEVEL_OWNER);
-		$this->irc->addCommand("stop", "Stops the kickfight", "", COMMAND_LEVEL_OWNER);
-		$this->irc->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", COMMAND_LEVEL_OWNER);
+		$this->irc->addCommand("op", "Gives operator status to user", "[<user>]", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("op", "Gives operator status to user", "[<user>] [force]", USER_LEVEL_MOD);
+		$this->irc->addCommand("start", "Starts the kickfight", "", USER_LEVEL_MOD);
+		$this->irc->addCommand("stop", "Stops the kickfight", "", USER_LEVEL_MOD);
+		$this->irc->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", USER_LEVEL_MOD);
 	}
 
 	public function softBan($user, $time){
@@ -52,6 +53,14 @@ class Kickfight_Plugin extends Base_Plugin {
 			$this->irc->op($channel, $user);
 		}
 	}
+	public function onNick($user, $new, $hostmask){
+		// Rename softbans
+		if(array_key_exists($user, $this->softBans)){
+			$this->softBans[$new] = $this->softBans[$user];
+			unset($this->softBans[$user]);
+		}
+	}
+
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
 		$count = 1;
@@ -185,7 +194,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					$this->irc->deop($channel, $argument[0]);
 					$this->irc->sendMessage($channel, "User $argument[0] has been banned for $time seconds by $user");
 				}else{
-					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban", COMMAND_LEVEL_GLOBAL));
+					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban", USER_LEVEL_GLOBAL));
 					return;
 				}
 				break;

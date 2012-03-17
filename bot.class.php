@@ -1,17 +1,20 @@
 <?php
+// Bot version
 define("VERSION", "0.3");
 // Bot name used in VERSION (not nick)
 define("BOT", "Databot");
+
 // General bot logs
 define("LOG_LEVEL_BOT", 1);
 // General irc logs
 define("LOG_LEVEL_IRC", 2);
 // Events in channels
 define("LOG_LEVEL_CHAT", 3);
-// Commands
-define("COMMAND_LEVEL_GLOBAL", 1);
-define("COMMAND_LEVEL_MOD", 2);
-define("COMMAND_LEVEL_OWNER", 3);
+
+// User levels
+define("USER_LEVEL_GLOBAL", 1);
+define("USER_LEVEL_MOD", 2);
+define("USER_LEVEL_OWNER", 3);
 class Bot {
 	public $start_time = 0;
 	public $server, 
@@ -21,6 +24,7 @@ class Bot {
 		$password;
 	public $channels = array();
 	public $owners = array();
+	public $moderators = array();
 	public $nick = "Bot";
 	public $commands = array();
 	public $users = array();
@@ -83,6 +87,9 @@ class Bot {
 					case "part":
 						$func = "onPart";
 					break;
+					case "nick":
+						$func = "onNick";
+					break;
 					case "command":
 						$func = "onCommand";
 					break;
@@ -127,19 +134,25 @@ class Bot {
 		}
 		$this->send("NOTICE", "$target :$message");
 	}
-	public function addCommand($command, $description, $usage, $level = COMMAND_LEVEL_GLOBAL){
-		$this->commands[$command]["description"] = $description;
-		$this->commands[$command]["usage"] = $usage;
-		$this->commands[$command]["level"] = $level;
+	public function addCommand($command, $description, $usage, $level = USER_LEVEL_GLOBAL){
+		$this->commands[$command][$level]["description"] = $description;
+		$this->commands[$command][$level]["usage"] = $usage;
 	}
-	public function getCommandUsage($command, $level = COMMAND_LEVEL_GLOBAL){
+	public function getCommandUsage($command, $level = USER_LEVEL_GLOBAL){
 		if($this->isCommand($command, $level)){
-			return "USAGE: ".$this->commands[$command]["usage"];
+			for($targetLevel = $level; $targetLevel > 0; $targetLevel--){
+				if(array_key_exists($targetLevel, $this->commands[$command])){
+					return "USAGE: ".$this->commands[$command][$targetLevel]["usage"];
+				}
+			}
 		}
 	}
-	public function isCommand($command, $level = COMMAND_LEVEL_GLOBAL){
+	public function isCommand($command, $level = USER_LEVEL_GLOBAL){
 		if(array_key_exists($command, $this->commands)){
-			return $this->commands[$command] == $level;
+			$levels = array_keys($this->commands[$command]);
+			if(min($levels) <= $level){
+				return true;
+			}
 		}
 		return false;
 	}
@@ -170,14 +183,29 @@ class Bot {
 	public function part($channel){
 		$this->send("PART", $channel);
 	}
+
+	public function getUserLevel($user, $hostname){
+		if($this->isOwner($user, $hostname)){
+			return USER_LEVEL_OWNER;
+		}elseif($this->isModerator($user, $hostname)){
+			return USER_LEVEL_MOD;
+		}else{
+			return USER_LEVEL_GLOBAL;
+		}
+	}
 	public function isOwner($user, $hostname){
 		return array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname;
 	}
+	public function isModerator($user, $hostname){
+		return array_key_exists($user, $this->moderators) && $this->moderators[$user] == $hostname;
+	}
+
 	public function run(){
 		if(!$this->sock){
-			$this->log("Connecting to server $this->server...", LOG_LEVEL_IRC);
+			$this->log("Connecting to $this->server...", LOG_LEVEL_IRC);
 			$this->connect($this->server, $this->port);
 		}
+		$this->log("Connected to $this->server", LOG_LEVEL_IRC);
 		$this->send("USER", "".$this->nick." Databot Databot :".$this->name."");
 		$this->send("NICK", $this->nick);
 		if(!empty($this->password)){
@@ -286,10 +314,25 @@ class Bot {
 						$this->log("[PART] $user parted $channel", LOG_LEVEL_CHAT);
 						$this->triggerEvent("part", $passedVars);
 					break;
+					case "NICK":
+						$new = $channel;
+
+						$passedVars = array(
+							"user" => $user,
+							"new" => $new,
+							"hostmask" => $hostmask
+						);
+
+						// Rename the user in the users array
+						$this->users[$new] = $this->users[$user];
+						unset($this->users[$user]);
+						$this->log("[NICK] $user changed nick to $new", LOG_LEVEL_CHAT);
+						$this->triggerEvent("nick", $passedVars);
+						break;
 					case "CTCP":
 						$message = substr($message, 1, -1);
 						if($message == "VERSION"){
-							$this->sendNotice($user, "VERSION ".BOT." :".VERSION);
+							$this->sendNotice($user, "VERSION ".BOT." ".VERSION);
 						}
 						break;
 					case "PRIVMSG":
