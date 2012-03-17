@@ -44,6 +44,6 @@ class Base_Plugin {
 			$this->irc->sendMessage($channel, $user.": ".$msg);
 		}
 	}
-	public function onMessage(/*$message, $command, $user, $channel, $hostmask*/){}
-	public function onTopic(/*$message, $command, $user, $channel, $hostmask*/){}
+	public function onMessage($message, $command, $user, $channel, $hostmask){}
+	public function onTopic($message, $command, $user, $channel, $hostmask){}
 }
