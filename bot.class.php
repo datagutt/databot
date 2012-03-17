@@ -243,7 +243,7 @@ class Bot {
 			}
 
 			// Read data
-			$data = fgets($this->sock, 256);
+			$data = fgets($this->sock, 8192);
 			if(empty($data)){
 				continue;
 			}else{
@@ -390,27 +390,9 @@ class Bot {
 							// Do not add ourselves
 							if($user !== $this->nick){
 								$this->users[$user] = $user;
-								// Send a request for the user host and catch it later
-								$this->send("USERHOST", $user);
 							}
 						}
 						break;
-					// User hosts
-					case "302":
-						$userhost = explode("=", $message);
-						$user = $userhost[0];
-						if($user !== $this->nick){
-							// Remove the +/- away status
-							$hostmask = substr($userhost[1], 1);
-							$hostname = explode("@", $hostmask);
-							$this->users[$user] = $hostmask;
-
-							// Do not add services
-							if($hostname[1] == "services."){
-								unset($this->users[$user]);
-							}
-						}
-					break;
 					default:
 						$this->triggerEvent($this->ex[1], $passedVars);
 					break;

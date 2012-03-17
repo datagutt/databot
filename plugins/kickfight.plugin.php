@@ -88,7 +88,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = true;
 				$this->irc->sendMessage($channel, "Starting KickFight!");
-				foreach($this->irc->users as $nick => $hostname){
+				foreach($this->irc->users as $nick){
 					if(!$this->isSoftBanned($nick)){
 						$this->irc->op($channel, $nick);
 					}
@@ -101,8 +101,8 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = false;
 				$this->irc->sendMessage($channel, "Stopping KickFight!");
-				foreach ($this->irc->users as $nick => $host) {
-					if(!$this->irc->isOwner($nick, $host)){
+				foreach ($this->irc->users as $nick) {
+					if($nick !== $user){
 						$this->irc->deop($channel, $nick);
 					}
 				}	
@@ -124,12 +124,6 @@ class Kickfight_Plugin extends Base_Plugin {
 					// Target user is not here
 					if(!array_key_exists($argument[0], $this->irc->users)){
 						$this->irc->sendMessage($channel, "$user: $argument[0] is not here, master");
-						return;
-					}
-
-					// Do not ban owners
-					if($this->irc->isOwner($argument[0], $this->irc->users[$argument[0]])){
-						$this->irc->sendMessage($channel, "$user: You can't ban other owners, master");
 						return;
 					}
 
