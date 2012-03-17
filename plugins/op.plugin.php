@@ -52,6 +52,19 @@ class OP_Plugin extends Base_Plugin {
 				}else{
 					$this->irc->devoice($channel, $user);
 				}
+			case $prefix."mute":
+				if(is_array($argument) && !empty($argument[0])){
+					$this->irc->mute($channel, $argument[0]);
+				}else{
+					$this->irc->mute($channel, $user);
+				}
+			break;
+			case $prefix."unmute":
+				if(is_array($argument) && !empty($argument[0])){
+					$this->irc->unmute($channel, $argument[0]);
+				}else{
+					$this->irc->unmute($channel, $user);
+				}
 			break;
 			case $prefix."kick":
 				if(is_array($argument) && !empty($argument[0])){

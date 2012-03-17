@@ -173,6 +173,12 @@ class Bot {
 	public function devoice($channel, $user){
 		$this->send("MODE", "$channel -v $user");
 	}
+	public function mute($channel, $user){
+		$this->send("MODE", "$channel +q $user");
+	}
+	public function unmute($channel, $user){
+		$this->send("MODE", "$channel -q $user");
+	}
 	public function ban($channel, $hostmask){
 		$this->send("MODE", "$channel +b $hostmask");
 	}
