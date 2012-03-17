@@ -60,7 +60,9 @@ class Kickfight_Plugin extends Base_Plugin {
 	}
 
 	public function onKick($message, $command, $user, $channel, $hostmask){
-		$this->irc->setTopic("// Last kick: $user // Most kicks: // !help");
+		if($this->enabled){
+			$this->irc->setTopic("// Last kick: $user // Most kicks: // !help");
+		}
 	}
 
 	public function onCommand($message, $command, $user, $channel, $hostmask){
