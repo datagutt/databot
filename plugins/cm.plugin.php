@@ -84,7 +84,7 @@ class CM_Plugin extends Base_Plugin {
 				}
 			break;
 			case $prefix."eta":
-				$msg = "NEVER ask for ETAs.";
+				$msg = "NO ETAs";
 			break;
 		}
 		if(!empty($msg)){
