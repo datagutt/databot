@@ -16,8 +16,8 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
 		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GENERAL);
-		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GENERAL);
+		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
