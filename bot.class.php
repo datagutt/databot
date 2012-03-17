@@ -90,6 +90,9 @@ class Bot {
 					case "nick":
 						$func = "onNick";
 					break;
+					case "message":
+						$func = "onMessage";
+					break;
 					case "command":
 						$func = "onCommand";
 					break;
