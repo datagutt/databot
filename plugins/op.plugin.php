@@ -11,8 +11,9 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("join", "Join the specified channel, "<channel>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("part", "Part the specified channel, "<channel>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
@@ -100,6 +101,11 @@ class OP_Plugin extends Base_Plugin {
 					$this->irc->sendMessage($channel, $msg);
 				}else{
 					$this->irc->sendMessage($channel, $this->irc->getCommandUsage("say", USER_LEVEL_OWNER));
+				}
+			break;
+			case $prefix."nick":
+				if(is_array($argument) && !empty($argument[0])){
+					$this->irc->nick($argument[0]);
 				}
 			break;
 			case $prefix."join":

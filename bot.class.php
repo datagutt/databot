@@ -188,6 +188,9 @@ class Bot {
 	public function unban($channel, $hostmask){
 		$this->send("MODE", "$channel -b $hostmask");
 	}
+	public function nick($nick){
+		$this->send("NICK", "$nick");
+	}
 	public function join($channel){
 		$this->send("JOIN", $channel);
 	}
