@@ -6,17 +6,17 @@ class CM_Plugin extends Base_Plugin {
 		// Commands
 		$this->irc->addCommand("supported", "Shows supported devices", "[<manufacturer>]", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("downloads", "Shows download link(s)", "[<device_name>]", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("eta", "Shows a angry message to the user", "", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("eta", "Shows an angry message to the user", "", USER_LEVEL_GLOBAL);
 		
 		// Devices
-		$this->addDevice("samsung", "galaxys2","GT-I9100", "http://get.cm/?device=galaxys2");
-		$this->addDevice("samsung", "galaxys","GT-I9000", "http://get.cm/?device=galaxysmtd");
-		$this->addDevice("samsung", "vibrantmtd","SGH-T959", "http://get.cm/?device=vibrantmtd");
-		$this->addDevice("samsung", "crespo","GT-I9020", "http://get.cm/?device=crespo");
-		$this->addDevice("samsung", "maguro","GT-I9250", "http://get.cm/?device=maguro");
-		$this->addDevice("samsung", "toro","SCH-I515", "http://get.cm/?device=toro");
-		$this->addDevice("samsung", "captivatemtd","SGH-I897", "http://get.cm/?device=captivatemtd");
-		$this->addDevice("samsung", "fascinatemtd","SCH-I500", "http://get.cm/?device=fascinatemtd");
+		$this->addDevice("samsung", "galaxys2", "GT-I9100", "http://get.cm/?device=galaxys2");
+		$this->addDevice("samsung", "galaxys", "GT-I9000", "http://get.cm/?device=galaxysmtd");
+		$this->addDevice("samsung", "vibrantmtd", "SGH-T959", "http://get.cm/?device=vibrantmtd");
+		$this->addDevice("samsung", "crespo", "GT-I9020", "http://get.cm/?device=crespo");
+		$this->addDevice("samsung", "maguro", "GT-I9250", "http://get.cm/?device=maguro");
+		$this->addDevice("samsung", "toro", "SCH-I515", "http://get.cm/?device=toro");
+		$this->addDevice("samsung", "captivatemtd", "SGH-I897", "http://get.cm/?device=captivatemtd");
+		$this->addDevice("samsung", "fascinatemtd", "SCH-I500", "http://get.cm/?device=fascinatemtd");
 	}
 	public function addDevice($manufacturer, $device_name, $device_model, $download_link = DEFAULT_DOWNLOAD_LINK){
 		if(!array_key_exists($manufacturer, $this->devices)){
@@ -34,9 +34,13 @@ class CM_Plugin extends Base_Plugin {
 			}
 		}
 	}
-	public function getDevices($manufacturer){
-		if(!$manufacturer){
-			return $this->devices;
+	public function getDevices($manufacturer = ""){
+		if(empty($manufacturer)){
+			$result = array();
+			foreach($this->devices as $manufacturer){
+				$result = array_merge($result, $manufacturer);
+			}
+			return $result;
 		}else{
 			if(array_key_exists($manufacturer, $this->devices)){
 				return $this->devices[$manufacturer];
