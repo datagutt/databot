@@ -135,6 +135,8 @@ class Bot {
 		$this->send("NOTICE", "$target :$message");
 	}
 	public function addCommand($command, $description, $usage, $level = USER_LEVEL_GLOBAL){
+		$this->commands[$command] = array();
+		$this->commands[$command][$level] = array();
 		$this->commands[$command][$level]["description"] = $description;
 		$this->commands[$command][$level]["usage"] = $usage;
 	}
@@ -182,6 +184,15 @@ class Bot {
 	}
 	public function part($channel){
 		$this->send("PART", $channel);
+	}
+	public function setTopic($channel, $topic = "Default"){
+		if(empty($channel) || empty($topic)){
+			trigger_error("sendTopic: No topic or channel given", E_USER_WARNING);
+			return;
+		}
+		// This needs TOPICLOCK to be set OFF on ChanServ 
+		$this->send("TOPIC", "$channel :$topic");
+		$this->log("[TOPIC] $channel topic set to $topic by command", LOG_LEVEL_CHAT);
 	}
 
 	public function getUserLevel($user, $hostname){
@@ -237,6 +248,7 @@ class Bot {
 				$data = trim($data);
 
 				$this->ex = explode(" ", $data);
+				
 				list($user, $hostmask, $hostname, $split, $command, $message, $channel) = "";
 				$size = sizeof($this->ex);
 
@@ -336,7 +348,7 @@ class Bot {
 						}
 						break;
 					case "PRIVMSG":
-						if(!empty($command) && in_array($channel, $this->channels)){
+						if(!empty($command)){
 							// If theres a prefix at the start of the message, its a command
 							$c = substr($command, 0, strlen($this->prefix));
 							if($c == $this->prefix){

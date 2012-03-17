@@ -3,8 +3,6 @@ class Kickfight_Plugin extends Base_Plugin {
 	public $enabled = false;
 	public $softBans = array();
 	public function setup(){
-		$this->irc->addCommand("op", "Gives operator status to user", "[<user>]", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("op", "Gives operator status to user", "[<user>] [force]", USER_LEVEL_MOD);
 		$this->irc->addCommand("start", "Starts the kickfight", "", USER_LEVEL_MOD);
 		$this->irc->addCommand("stop", "Stops the kickfight", "", USER_LEVEL_MOD);
 		$this->irc->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", USER_LEVEL_MOD);
@@ -61,6 +59,10 @@ class Kickfight_Plugin extends Base_Plugin {
 		}
 	}
 
+	public function onKick($message, $command, $user, $channel, $hostmask){
+		$this->irc->setTopic("// Last kick: $user // Most kicks: // !help");
+	}
+
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
 		$count = 1;
@@ -76,58 +78,6 @@ class Kickfight_Plugin extends Base_Plugin {
 				break;
 		}
 		switch($command){
-			case $prefix."op":
-				// Only do checks for non-owners
-				if(!$this->irc->isOwner($user, $hostmask)) {
-					// We have not started yet
-					if(!$this->enabled){
-						$this->irc->sendMessage($channel, "$user: We have not started yet, idiot");
-						return;
-					}
-
-					// No need to op ourselves
-					if($user == $this->irc->nick){
-						$this->irc->sendMessage($channel, "$user: You can't op me, idiot");
-					}
-
-					// Banned user should not be allowed to op anyone
-					if($this->isSoftBanned($user)){
-						$this->irc->sendMessage($channel, "$user: You are softbanned for another ".($this->softBans[$user] - time())." seconds");
-						return;
-					}
-
-					// Target user is not the command sender
-					if(is_array($argument) && !empty($argument[0]) && $argument[0] !== $user){
-						// Target user is not here
-						if(!array_key_exists($argument[0], $this->irc->users)){
-							$this->irc->sendMessage($channel, "$user: $argument[0] is not here, idiot");
-							return;
-						}
-
-						// Do not allow softban user op
-						if($this->isSoftBanned($argument[0])){
-							$this->irc->sendMessage($channel, "$user: $argument[0] is softbanned for another ".($this->softBans[$argument[0]] - time())." seconds");
-							return;
-						}
-					}
-				}else{
-					// Target user is not the command sender
-					if(is_array($argument) && !empty($argument[0])){
-						// Check for force argument
-						if(!empty($argument[1]) && $argument[1] !== "force"){
-							$this->irc->sendMessage($channel, "$user: USAGE: op [<user>] [force]");
-							return;
-						}
-
-						// Warn the owner that the user is banned
-						if($this->isSoftBanned($argument[0])){
-							$this->irc->sendMessage($channel, "$user: $argument[0] is softbanned for another ".($this->softBans[$argument[0]] - time())." seconds. To force OP this user use the force flag.");
-							return;
-						}
-					}
-				}
-				$this->irc->op($channel, (is_array($argument) && $argument[0]) ? $argument[0] : $user);
-			break;
 			case $prefix."start":
 				// We have already started
 				if($this->enabled){

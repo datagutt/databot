@@ -8,12 +8,20 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->commands["kick"] = "kick";
 		$this->irc->commands["kickban"] = "kickban";
 		$this->irc->commands["topic"] = "topic";
+		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_OWNER);
+		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
 		$count = 1;
 		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
-		if(!$this->isOwner($user, $hostmask){
+		if(!$this->irc->isOwner($user, $hostmask)){
 			return;
 		}
 		switch($command){
@@ -59,8 +67,27 @@ class OP_Plugin extends Base_Plugin {
 				}
 			break;
 			case $prefix."topic":
-				if(is_array($argument) && !empty($argument[0])){
-					$this->irc->send("TOPIC", $channel." ".$argument[0]);
+				if(is_array($argument)){
+					$topic = "";
+					foreach($argument as $line){
+						$topic .= $line;
+						$topic .= " ";
+					}
+					$this->irc->setTopic($channel, $topic);
+				}
+			break;
+			case $prefix."say":
+				if(is_array($argument)){
+					$channel = $argument[0];
+					unset($argument[0]);
+					$msg = "";
+					foreach($argument as $line){
+						$msg .= $line;
+						$msg .= " ";
+					}
+					$this->irc->sendMessage($channel, $msg);
+				}else{
+					$this->irc->sendMessage($channel, $this->irc->getCommandUsage("say", USER_LEVEL_OWNER));
 				}
 			break;
 			case $prefix."join":
