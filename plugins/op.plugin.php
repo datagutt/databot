@@ -11,6 +11,8 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("join", "Join the specified channel, "<channel>", USER_LEVEL_OWNER);
+	        $this->irc->addCommand("part", "Part the specified channel, "<channel>", USER_LEVEL_OWNER);
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
