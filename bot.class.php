@@ -17,10 +17,12 @@ define("USER_LEVEL_MOD", 2);
 define("USER_LEVEL_OWNER", 3);
 class Bot {
 	public $start_time = 0;
-	public $server, 
+	public $last_send_time = time();
+	public $server,
 		$port = 6667,
 		$name = "Realname",
 		$prefix = "@",
+		$delay = 1,
 		$password;
 	public $channels = array();
 	public $owners = array();
@@ -118,7 +120,14 @@ class Bot {
 	public function send($action = "CTCP", $arg){
 		if($this->sock){
 			$output = "$action $arg\n";
+            
+			// anti flood
+			if ($this->last_send_time > (time() - $this->delay)) {
+				sleep($this->delay);
+			}
+
 			fwrite($this->sock, $output);
+			$this->last_send_time = time();
 		}else{
 			throw new Exception("Not connected to server");
 		}
