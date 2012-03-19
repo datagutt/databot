@@ -248,7 +248,7 @@ class Bot {
 		}
 		$this->log("Connected to $this->server", LOG_LEVEL_IRC);
 		$this->send("USER", "".$this->nick." Databot Databot :".$this->name."");
-		$this->send("NICK", $this->nick);
+		$this->nick($this->nick);
 		if(!empty($this->password)){
 			$this->send("NS", "IDENTIFY ".$this->password."");
 		}else{
@@ -412,7 +412,7 @@ class Bot {
 						foreach($users as $user){
 							$user = preg_replace("/^[^A-}]+/", "", $user);
 							// Do not add ourselves
-							if($user !== $this->nick){
+							if($user !== $this->nick && $hostname !== "services."){
 								$this->users[$user] = $user;
 							}
 						}
