@@ -8,6 +8,7 @@ class Base_Plugin {
 		$this->setup();
 	}
 	public function setup(){
+		$this->irc->addCommand("level", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 		if(!$this->irc->isCommand("help")){
 			$this->irc->addCommand("help", "Shows commands and how to use them", "[command]", USER_LEVEL_GLOBAL);
 		}
@@ -22,6 +23,9 @@ class Base_Plugin {
 		$prefix = $this->irc->prefix;
 		$msg = "";
 		switch($command){
+			case $prefix."level":
+				$msg = "Your bot control level is: ".$this->irc->getUserLevel($user, $hostmask);
+				break;
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
