@@ -10,7 +10,7 @@ class Base_Plugin {
 	public function setup(){
 		$this->irc->addCommand("level", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 		if(!$this->irc->isCommand("help")){
-			$this->irc->addCommand("help", "Shows commands and how to use them", "[command]", USER_LEVEL_GLOBAL);
+			$this->irc->addCommand("help", "Shows commands and how to use them", "[<command>]", USER_LEVEL_GLOBAL);
 		}
 	}
 	public function onLoop(){}
@@ -21,31 +21,42 @@ class Base_Plugin {
 	public function onKick($message, $command, $user, $channel, $hostmask){}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
-		$msg = "";
+		$count = 1;
+		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
+		$userLevel = $this->irc->getUserLevel($user, $hostmask);
 		switch($command){
 			case $prefix."level":
-				$msg = "Your bot control level is: ".$this->irc->getUserLevel($user, $hostmask);
+				$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
 				break;
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
-				$msg = BOT." version ".VERSION."; commit $commit; uptime ".$running."s.";
+				$this->irc->sendMessage($channel, "$user: ".BOT." version ".VERSION."; commit $commit; uptime ".$running."s.");
 			break;
 			case $prefix."help":
-				$msg = "Available commands: ";
-
-				$userLevel = $this->irc->getUserLevel($user, $hostmask);
-
-				foreach($this->irc->commands as $command => $levels){
-					if($this->irc->isCommand($command, $userLevel)){
-						$msg .= $prefix.$command;
-						$msg .= " ";
+				if(is_array($argument) && !empty($argument[0])){
+					if(!$this->irc->isCommand($argument[0], $userLevel)){
+						$this->irc->sendMessage($channel, $user.": Command $argument[0] does not exist or you are not authorized to perform it");
+						return;
 					}
+					$usage = $this->irc->getCommandUsage($argument[0], $userLevel);
+					$description = $this->irc->getCommandDescription($argument[0], $userLevel);
+					$this->irc->sendMessage($channel, "$user: $prefix$argument[0] $usage");
+					$this->irc->sendMessage($channel, "$user: $description");
+				}else{
+					$msg = "Available commands: ";
+
+					$userLevel = $this->irc->getUserLevel($user, $hostmask);
+
+					foreach($this->irc->commands as $command => $levels){
+						if($this->irc->isCommand($command, $userLevel)){
+							$msg .= $prefix.$command;
+							$msg .= " ";
+						}
+					}
+					$this->irc->sendMessage($channel, "$user: ".$msg);
 				}
 			break;
-		}
-		if(!empty($msg)){
-			$this->irc->sendMessage($channel, $user.": ".$msg);
 		}
 	}
 	public function onMessage($message, $command, $user, $channel, $hostmask){}

@@ -152,11 +152,20 @@ class Bot {
 		$this->commands[$command][$level]["description"] = $description;
 		$this->commands[$command][$level]["usage"] = $usage;
 	}
+	public function getCommandDescription($command, $level = USER_LEVEL_GLOBAL){
+		if($this->isCommand($command, $level)){
+			for($targetLevel = $level; $targetLevel > 0; $targetLevel--){
+				if(array_key_exists($targetLevel, $this->commands[$command])){
+					return $this->commands[$command][$targetLevel]["description"];
+				}
+			}
+		}
+	}
 	public function getCommandUsage($command, $level = USER_LEVEL_GLOBAL){
 		if($this->isCommand($command, $level)){
 			for($targetLevel = $level; $targetLevel > 0; $targetLevel--){
 				if(array_key_exists($targetLevel, $this->commands[$command])){
-					return "USAGE: ".$this->commands[$command][$targetLevel]["usage"];
+					return $this->commands[$command][$targetLevel]["usage"];
 				}
 			}
 		}
