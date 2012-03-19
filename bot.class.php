@@ -403,7 +403,7 @@ class Bot {
 						foreach($users as $user){
 							$user = preg_replace("/^[^A-}]+/", "", $user);
 							// Do not add ourselves
-							if($user !== $this->nick){
+							if($user !== $this->nick && $hostname !== "services."){
 								$this->users[$user] = $user;
 							}
 						}
