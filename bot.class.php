@@ -239,7 +239,7 @@ class Bot {
 		}
 		$this->log("Connected to $this->server", LOG_LEVEL_IRC);
 		$this->send("USER", "".$this->nick." Databot Databot :".$this->name."");
-		$this->send("NICK", $this->nick);
+		$this->nick($this->nick);
 		if(!empty($this->password)){
 			$this->send("NS", "IDENTIFY ".$this->password."");
 		}else{
