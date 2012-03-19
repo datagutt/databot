@@ -412,11 +412,29 @@ class Bot {
 						foreach($users as $user){
 							$user = preg_replace("/^[^A-}]+/", "", $user);
 							// Do not add ourselves
-							if($user !== $this->nick && $hostname !== "services."){
+							if($user !== $this->nick){
 								$this->users[$user] = $user;
+								// Send a request for the hostmask and catch it later
+								$this->send("USERHOST", $user);
 							}
 						}
-						break;
+					break;
+					// User hosts
+					case "302":
+						$userhost = explode("=", $message);
+						$user = $userhost[0];
+						if($user !== $this->nick){
+							// Remove the +/- away status
+							$hostmask = substr($userhost[1], 1);
+							$hostname = explode("@", $hostmask);
+							$this->users[$user] = $hostmask;
+
+							// Do not add services
+							if($hostname[1] == "services."){
+								unset($this->users[$user]);
+							}
+						}
+					break;
 					default:
 						$this->triggerEvent($this->ex[1], $passedVars);
 					break;

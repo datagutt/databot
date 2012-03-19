@@ -8,10 +8,10 @@ class Base_Plugin {
 		$this->setup();
 	}
 	public function setup(){
-		$this->irc->addCommand("level", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 		if(!$this->irc->isCommand("help")){
 			$this->irc->addCommand("help", "Shows commands and how to use them", "[<command>]", USER_LEVEL_GLOBAL);
 		}
+		$this->irc->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 	}
 	public function onLoop(){}
 	public function onNick($user, $new, $hostmask){}
@@ -25,9 +25,19 @@ class Base_Plugin {
 		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
 		$userLevel = $this->irc->getUserLevel($user, $hostmask);
 		switch($command){
-			case $prefix."level":
-				$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
-				break;
+			case $prefix."userlevel":
+				if(is_array($argument) && !empty($argument[0])){
+					// Target user is not here
+					if(!array_key_exists($argument[0], $this->irc->users)){
+						$this->irc->sendMessage($channel, "$user: Unknown user $argument[0]");
+						return;
+					}
+					$userLevel = $this->irc->getUserLevel($argument[0], $this->irc->users[$argument[0]]);
+					$this->irc->sendMessage($channel, $user.": $argument[0]'s bot control level is: $userLevel");
+				}else{
+					$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
+				}
+			break;
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
