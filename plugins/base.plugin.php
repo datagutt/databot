@@ -12,6 +12,7 @@ class Base_Plugin {
 			$this->irc->addCommand("help", "Shows commands and how to use them", "[<command>]", USER_LEVEL_GLOBAL);
 		}
 		$this->irc->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("set", "Set a property", "<property> <value>", USER_LEVEL_OWNER);
 	}
 	public function onLoop(){}
 	public function onNick($user, $new, $hostmask){}
@@ -36,6 +37,33 @@ class Base_Plugin {
 					$this->irc->sendMessage($channel, $user.": $argument[0]'s bot control level is: $userLevel");
 				}else{
 					$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
+				}
+			break;
+			case $prefix."set":
+				switch($argument[0]){
+					case "autoOP":
+						if(isset($argument[1])){
+							$this->irc->autoOP = (boolean) $argument[1];
+						}
+					break;
+					case "owners":
+						if(isset($argument[1]) && isset($argument[1])){
+							$owners = explode(",", $argument[1]);
+							$i = 0;
+							foreach($owners as $owner){
+								$this->irc->owners[$owner] = $this->irc->users[$owner];					$i++;
+							}
+						}
+					break;
+					case "mods":
+						if(isset($argument[1]) && isset($argument[1])){
+							$mods = explode(",", $argument[1]);
+							$i = 0;
+							foreach($mods as $mod){
+								$this->irc->moderators[$mod] = $this->irc->users[$mod];					$i++;
+							}
+						}
+					break;
 				}
 			break;
 			case $prefix."ping":

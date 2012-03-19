@@ -31,6 +31,7 @@ class Bot {
 	public $commands = array();
 	public $users = array();
 	public $loop = 10;
+	public $autoOP = true;
 	private $logLevel = LOG_LEVEL_IRC;
 	private $sock, $ex, $loopCount, $plugins = array(),
 		$loadedPlugins = array();

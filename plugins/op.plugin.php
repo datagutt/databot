@@ -16,9 +16,11 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
 	}
 	public function onJoin($message, $command, $user, $channel, $hostmask){
-		$userLevel = $this->irc->getUserLevel($user, $hostmask);
-		if($userLevel == USER_LEVEL_OWNER){
-			$this->irc->op($channel, $user);
+		if($this->irc->autoOP){
+			$userLevel = $this->irc->getUserLevel($user, $hostmask);
+			if($userLevel == USER_LEVEL_OWNER){
+				$this->irc->op($channel, $user);
+			}
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
