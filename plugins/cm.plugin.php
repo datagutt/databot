@@ -52,6 +52,9 @@ class CM_Plugin extends Base_Plugin {
 		if(preg_match("/\beta\b/iU", $message)){
 			$this->irc->sendMessage($channel, $user.": NO ETAs");
 		}
+		if(preg_match("/\bmiui\b/iU", $message)){
+			$this->irc->kick($channel, $user, "DO NOT TALK ABOUT THAT SHIT");
+		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$prefix = $this->irc->prefix;
