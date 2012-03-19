@@ -1,13 +1,13 @@
 <?php
 class OP_Plugin extends Base_Plugin {
 	public function setup(){
-		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_OWNER);
-		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_OWNER);
-		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_OWNER);
-		$this->irc->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_OWNER);
-		$this->irc->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_MOD);
+		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->irc->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
+		$this->irc->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_MOD);
 		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
-		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
 		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
