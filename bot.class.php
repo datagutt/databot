@@ -17,7 +17,7 @@ define("USER_LEVEL_MOD", 2);
 define("USER_LEVEL_OWNER", 3);
 class Bot {
 	public $start_time = 0;
-	public $last_send_time = time();
+	public $last_send_time = 0;
 	public $server,
 		$port = 6667,
 		$name = "Realname",
