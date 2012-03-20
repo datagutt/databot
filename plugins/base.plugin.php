@@ -47,20 +47,44 @@ class Base_Plugin {
 						}
 					break;
 					case "owners":
-						if(isset($argument[1]) && isset($argument[1])){
-							$owners = explode(",", $argument[1]);
-							$i = 0;
-							foreach($owners as $owner){
-								$this->irc->owners[$owner] = $this->irc->users[$owner];					$i++;
+						if(isset($argument[1])){
+							if(!isset($argument[2])){
+								$this->irc->sendMessage($channel, "An action, please?");
+								return;
+							}
+							$owners = explode(",", $argument[2]);
+							switch($argument[1]){
+								case "add":
+									foreach($owners as $owner){
+										$this->irc->owners[$owner] = $this->irc->users[$owner];
+									}
+								break;
+								case "remove":
+									foreach($owners as $owner){
+										unset($this->irc->owners[$owner]);
+									}
+								break;
 							}
 						}
 					break;
-					case "mods":
-						if(isset($argument[1]) && isset($argument[1])){
-							$mods = explode(",", $argument[1]);
-							$i = 0;
-							foreach($mods as $mod){
-								$this->irc->moderators[$mod] = $this->irc->users[$mod];					$i++;
+					case "moderators":
+						if(isset($argument[1])){
+							if(!isset($argument[2])){
+								$this->irc->sendMessage($channel, "An action, please?");
+								return;
+							}
+							$mods = explode(",", $argument[2]);
+							switch($argument[1]){
+								case "add":
+									foreach($mods as $mod){
+										$this->irc->moderators[$mod] = $this->irc->users[$mod];
+									}
+								break;
+								case "remove":
+									foreach($mods as $mod){
+										unset($this->irc->moderators[$mod]);
+									}
+								break;
 							}
 						}
 					break;
