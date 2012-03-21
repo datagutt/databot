@@ -130,10 +130,10 @@ class Base_Plugin {
 								$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$mod]." added to moderators list");
 							}
 							break;
-							case "remove":
+						case "remove":
 							foreach($mods as $mod){
 								$mod = trim($mod);
-									unset($this->irc->owners[$mod]);
+									unset($this->irc->moderators[$mod]);
 									$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$mod]." removed from moderators list");
 								}
 							break;
