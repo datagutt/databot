@@ -284,6 +284,8 @@ class Bot {
 				}
 				$data = trim($data);
 
+				echo $data."\n";
+
 				$this->ex = explode(" ", $data);
 				
 				list($user, $hostmask, $hostname, $split, $command, $message, $channel) = "";

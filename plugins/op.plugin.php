@@ -26,7 +26,7 @@ class OP_Plugin extends Base_Plugin {
 		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
 		$userLevel = $this->irc->getUserLevel($user, $hostmask);
 
-		if(!$this->irc->isCommand(substr($command, 1), $userLevel)){
+		if(!$this->irc->isCommand($command, $userLevel)){
 			return;
 		}
 		switch($command){

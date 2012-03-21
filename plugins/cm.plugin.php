@@ -56,12 +56,11 @@ class CM_Plugin extends Base_Plugin {
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
-		$prefix = $this->irc->prefix;
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
+		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
 		$msg = "";
 		switch($command){
-			case $prefix."supported":
+			case "supported":
 				if(is_array($argument) && !empty($argument[0])){	
 					$devices = $this->getDevices($argument[0]);
 				}else{
@@ -77,7 +76,7 @@ class CM_Plugin extends Base_Plugin {
 					$msg .= " ";
 				}
 			break;
-			case $prefix."downloads":
+			case "downloads":
 				if(is_array($argument) && !empty($argument[0])){
 					$device = $this->getDevice($argument[0]);
 					if(is_array($device)){
@@ -90,7 +89,7 @@ class CM_Plugin extends Base_Plugin {
 					$msg = "Downloads: ". DEFAULT_DOWNLOAD_LINK;
 				}
 			break;
-			case $prefix."eta":
+			case "eta":
 				$msg = "NO ETAs";
 			break;
 		}
