@@ -6,7 +6,6 @@ class CM_Plugin extends Base_Plugin {
 		// Commands
 		$this->irc->addCommand("supported", "Shows supported devices", "[<manufacturer>]", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("downloads", "Shows download link(s)", "[<device_name>]", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("eta", "Shows an angry message to the user", "", USER_LEVEL_GLOBAL);
 		
 		// Devices
 		$this->addDevice("samsung", "galaxys2", "GT-I9100", "http://get.cm/?device=galaxys2");
