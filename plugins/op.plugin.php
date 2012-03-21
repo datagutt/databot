@@ -6,6 +6,8 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_MOD);
 		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
 		$this->irc->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
+		$this->irc->addCommand("mute", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->irc->addCommand("unmute", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
 		$this->irc->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_MOD);
 		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
 		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
@@ -83,10 +85,12 @@ class OP_Plugin extends Base_Plugin {
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->ban($channel, $argument[0]);
 					$this->irc->kick($channel, $argument[0]);
+				}else{
+					$this->irc->sendMessage($channel, $this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "topic":
-				if(is_array($argument)){
+				if(is_array($argument) && !empty($argument[0])){
 					$topic = "";
 					foreach($argument as $line){
 						$topic .= $line;
@@ -106,22 +110,28 @@ class OP_Plugin extends Base_Plugin {
 					}
 					$this->irc->sendMessage($channel, $msg);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->getCommandUsage("say", USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "nick":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->nick($argument[0]);
+				}else{
+					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "join":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->send("JOIN", $argument[0]);
+				}else{
+					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "part":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->send("PART", $argument[0]);
+				}else{
+					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 		}
