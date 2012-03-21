@@ -16,7 +16,7 @@ class OP_Plugin extends Base_Plugin {
 	public function onJoin($message, $command, $user, $channel, $hostmask){
 		if($this->irc->autoOP){
 			$userLevel = $this->irc->getUserLevel($user, $hostmask);
-			if($userLevel == USER_LEVEL_OWNER){
+			if($userLevel >= USER_LEVEL_MOD){
 				$this->irc->op($channel, $user);
 			}
 		}
