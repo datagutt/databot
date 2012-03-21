@@ -1,5 +1,6 @@
 <?php
 class OP_Plugin extends Base_Plugin {
+	public $autoOP = true;
 	public function setup(){
 		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_MOD);
 		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_MOD);
@@ -16,7 +17,7 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
 	}
 	public function onJoin($message, $command, $user, $channel, $hostmask){
-		if($this->irc->autoOP){
+		if($this->autoOP){
 			$userLevel = $this->irc->getUserLevel($user, $hostmask);
 			if($userLevel >= USER_LEVEL_MOD){
 				$this->irc->op($channel, $user);
