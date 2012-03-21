@@ -55,10 +55,22 @@ class Base_Plugin {
 				switch($argument[0]){
 					case "autoOP":
 						if(isset($argument[1])){
-							$this->irc->autoOP = (boolean) $argument[1];
+							$arg1 = trim($argument[1]);
+							if($arg1 == "true" || $arg1 == "1"){
+								$this->irc->setPluginProperty("OP_Plugin", "autoOP", true);
+							}else{
+								$this->irc->setPluginProperty("OP_Plugin", "autoOP", false);			}
 						}
 					break;
 				}
+				$passedVars = array(
+					"message" => $message,
+					"command" => $command,
+					"user" => $user,
+					"channel" => $channel,
+					"hostmask" => $hostmask
+				);
+				$this->irc->triggerEvent("onSet", $passedVars);
 			break;
 			case "owners":
 				if(is_array($argument) && !empty($argument[0])){

@@ -31,7 +31,6 @@ class Bot {
 	public $commands = array();
 	public $users = array();
 	public $loop = 10;
-	public $autoOP = true;
 	private $logLevel = LOG_LEVEL_IRC;
 	private $sock, $ex, $loopCount, $plugins = array(),
 		$loadedPlugins = array();
@@ -79,6 +78,15 @@ class Bot {
 			$this->loadedPlugins[$class] = new $class($this->sock, $this);
 		}
 	}
+	public function setPluginProperty($plugin, $property, $value){
+		if(empty($plugin) || empty($property)){
+			trigger_error("setPluginProperty: No plugin, property and value given", E_USER_WARNING);
+			return;
+		}
+		if(array_key_exists($plugin, $this->loadedPlugins)){
+			$this->loadedPlugins[$plugin]->$property = $value;
+		}
+	}
 	public function triggerEvent($event, $vars = array()){
 		if($this->sock){
 			foreach($this->plugins as $class => $plugin){
@@ -107,6 +115,9 @@ class Bot {
 					break;
 					case "kick":
 						$func = "onKick";
+					break;
+					case "set":
+						$func = "onSet";
 					break;
 				}
 				if($func !== "onDefault"){
