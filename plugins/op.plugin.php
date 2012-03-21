@@ -9,8 +9,6 @@ class OP_Plugin extends Base_Plugin {
 		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
 		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
 		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_OWNER);
 		$this->irc->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
@@ -125,22 +123,6 @@ class OP_Plugin extends Base_Plugin {
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->send("PART", $argument[0]);
 				}
-			break;
-			case $prefix."owners":
-				$msg = "Owners: ";
-				foreach($this->irc->owners as $owner => $hostmask){
-					$msg .= $owner;
-					$msg .= " ";
-				}
-				$this->irc->sendMessage($channel, $msg);
-			break;
-			case $prefix."moderators":
-				$msg = "Moderators: ";
-				foreach($this->irc->moderators as $moderator => $hostmask){
-					$msg .= $moderator;
-					$msg .= " ";
-				}
-				$this->irc->sendMessage($channel, $msg);
 			break;
 		}
 	}

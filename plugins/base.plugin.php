@@ -13,6 +13,8 @@ class Base_Plugin {
 		}
 		$this->irc->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 		$this->irc->addCommand("set", "Set a property", "<property> <value>", USER_LEVEL_OWNER);
+		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
+		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
 	}
 	public function onLoop(){}
 	public function onNick($user, $new, $hostmask){}
@@ -49,22 +51,40 @@ class Base_Plugin {
 					case "owners":
 						if(isset($argument[1]) && isset($argument[1])){
 							$owners = explode(",", $argument[1]);
-							$i = 0;
 							foreach($owners as $owner){
-								$this->irc->owners[$owner] = $this->irc->users[$owner];					$i++;
+								$owner = trim($owner);
+								$this->irc->owners[$owner] = $this->irc->users[$owner];
+								$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$owner]." added to owners list");
 							}
 						}
 					break;
 					case "mods":
 						if(isset($argument[1]) && isset($argument[1])){
 							$mods = explode(",", $argument[1]);
-							$i = 0;
 							foreach($mods as $mod){
-								$this->irc->moderators[$mod] = $this->irc->users[$mod];					$i++;
+								$mod = trim($mod);
+								$this->irc->moderators[$mod] = $this->irc->users[$mod];
+								$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$mod]." added to moderators list");
 							}
 						}
 					break;
 				}
+			break;
+			case $prefix."owners":
+				$msg = "Owners: ";
+				foreach($this->irc->owners as $owner => $hostmask){
+					$msg .= $owner;
+					$msg .= " ";
+				}
+				$this->irc->sendMessage($channel, "$user: $msg");
+			break;
+			case $prefix."moderators":
+				$msg = "Moderators: ";
+				foreach($this->irc->moderators as $moderator => $hostmask){
+					$msg .= $moderator;
+					$msg .= " ";
+				}
+				$this->irc->sendMessage($channel, "$user: $msg");
 			break;
 			case $prefix."ping":
 				$running = round(microtime(true) - $this->irc->start_time);
