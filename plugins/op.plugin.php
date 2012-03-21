@@ -59,6 +59,7 @@ class OP_Plugin extends Base_Plugin {
 				}else{
 					$this->irc->devoice($channel, $user);
 				}
+			break;
 			case "mute":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->mute($channel, $argument[0]);
