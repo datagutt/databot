@@ -22,7 +22,7 @@ class Bot {
 		$port = 6667,
 		$name = "Realname",
 		$prefix = "@",
-		$delay = 0.1,
+		$delay = 0.2,
 		$password;
 	public $channels = array();
 	public $owners = array();
