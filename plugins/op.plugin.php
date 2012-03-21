@@ -2,23 +2,23 @@
 class OP_Plugin extends Base_Plugin {
 	public $autoOP = true;
 	public function setup(){
-		$this->irc->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_MOD);
-		$this->irc->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("mute", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("unmute", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_MOD);
-		$this->irc->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
-		$this->irc->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
-		$this->irc->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("op", "Gives OP to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("deop", "Removes OP from the user", "[<user>]",  USER_LEVEL_MOD);
+		$this->bot->addCommand("voice", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("devoice", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("mute", "Gives voice to the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("unmute", "Remove voice from the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("kick", "Kicks the user", "[<user>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("kickban", "Kicks and bans the user", "[<user>]", USER_LEVEL_OWNER);
+		$this->bot->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
+		$this->bot->addCommand("say", "Makes the bot say something", "<message>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
 	}
 	public function onJoin($message, $command, $user, $channel, $hostmask){
 		if($this->autoOP){
-			$userLevel = $this->irc->getUserLevel($user, $hostmask);
+			$userLevel = $this->bot->getUserLevel($user, $hostmask);
 			if($userLevel >= USER_LEVEL_MOD){
 				$this->irc->op($channel, $user);
 			}
@@ -26,10 +26,10 @@ class OP_Plugin extends Base_Plugin {
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
-		$userLevel = $this->irc->getUserLevel($user, $hostmask);
+		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
+		$userLevel = $this->bot->getUserLevel($user, $hostmask);
 
-		if(!$this->irc->isCommand($command, $userLevel)){
+		if(!$this->bot->isCommand($command, $userLevel)){
 			return;
 		}
 		switch($command){
@@ -86,7 +86,7 @@ class OP_Plugin extends Base_Plugin {
 					$this->irc->ban($channel, $argument[0]);
 					$this->irc->kick($channel, $argument[0]);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->bot->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "topic":
@@ -110,28 +110,28 @@ class OP_Plugin extends Base_Plugin {
 					}
 					$this->irc->sendMessage($channel, $msg);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->bot->prefix.$command." ".$this->bot->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "nick":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->nick($argument[0]);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->bot->prefix.$command." ".$this->bot->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "join":
 				if(is_array($argument) && !empty($argument[0])){
-					$this->irc->send("JOIN", $argument[0]);
+					$this->irc->join($argument[0]);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->bot->prefix.$command." ".$this->bot->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 			case "part":
 				if(is_array($argument) && !empty($argument[0])){
-					$this->irc->send("PART", $argument[0]);
+					$this->irc->part($argument[0]);
 				}else{
-					$this->irc->sendMessage($channel, $this->irc->prefix.$command." ".$this->irc->getCommandUsage($command, USER_LEVEL_OWNER));
+					$this->irc->sendMessage($channel, $this->bot->prefix.$command." ".$this->bot->getCommandUsage($command, USER_LEVEL_OWNER));
 				}
 			break;
 		}

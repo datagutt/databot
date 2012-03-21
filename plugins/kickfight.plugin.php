@@ -3,13 +3,13 @@ class Kickfight_Plugin extends Base_Plugin {
 	public $enabled = false;
 	public $softBans = array();
 	public function setup(){
-		$this->irc->addCommand("start", "Starts the kickfight", "", USER_LEVEL_MOD);
-		$this->irc->addCommand("stop", "Stops the kickfight", "", USER_LEVEL_MOD);
-		$this->irc->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", USER_LEVEL_MOD);
+		$this->bot->addCommand("start", "Starts the kickfight", "", USER_LEVEL_MOD);
+		$this->bot->addCommand("stop", "Stops the kickfight", "", USER_LEVEL_MOD);
+		$this->bot->addCommand("softban", "Softsbans the user", "<user> [<seconds>]", USER_LEVEL_MOD);
 	}
 
 	public function softBan($user, $time){
-		if($user == $this->irc->nick) return;
+		if($user == $this->bot->nick) return;
 		$this->softBans[$user] = time() + $time;
 	}
 
@@ -39,7 +39,7 @@ class Kickfight_Plugin extends Base_Plugin {
 	public function onJoin($message, $command, $user, $channel, $hostmask){
 		if($this->enabled){
 			// No need to op ourselves
-			if($user == $this->irc->nick){
+			if($user == $this->bot->nick){
 				return;
 			}
 
@@ -48,7 +48,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				$this->irc->sendNotice($user, "You are softbanned for another ".($this->softBans[$user] - time())." seconds");
 				return;
 			}
-			$this->irc->op($channel, $user);
+			$this->bot->op($channel, $user);
 		}
 	}
 	public function onNick($user, $new, $hostmask){
@@ -61,18 +61,18 @@ class Kickfight_Plugin extends Base_Plugin {
 
 	public function onKick($message, $command, $user, $channel, $hostmask){
 		if($this->enabled){
-			$this->irc->setTopic($channel, "// Last kicker: $user // Most kicks: // !help");
+			$this->bot->setTopic($channel, "// Last kicker: $user // Most kicks: // !help");
 		}
 	}
 
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
+		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
 		switch($command){
 			case "start":
 			case "stop":
 			case "softban":
-				if(!$this->irc->isOwner($user, $hostmask)){;
+				if(!$this->bot->isOwner($user, $hostmask)){;
 					$this->irc->sendMessage($channel, "$user: $command can only be called by owners, idiot");
 					return;
 				}
@@ -87,9 +87,9 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = true;
 				$this->irc->sendMessage($channel, "Starting KickFight!");
-				foreach($this->irc->users as $nick => $host){
+				foreach($this->bot->users as $nick => $host){
 					if(!$this->isSoftBanned($nick)){
-						$this->irc->op($channel, $nick);
+						$this->bot->op($channel, $nick);
 					}
 				}	
 				break;
@@ -100,16 +100,16 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = false;
 				$this->irc->sendMessage($channel, "Stopping KickFight!");
-				foreach ($this->irc->users as $nick => $host) {
+				foreach ($this->bot->users as $nick => $host) {
 					if($nick !== $user){
-						$this->irc->deop($channel, $nick);
+						$this->bot->deop($channel, $nick);
 					}
 				}	
 				break;
 			case "softban":
 				if(is_array($argument) && !empty($argument[0])){
 					// Do not ban ourselves
-					if($argument[0] == $this->irc->nick){
+					if($argument[0] == $this->bot->nick){
 						$this->irc->sendMessage($channel, "$user: You can't ban me, master");
 						return;
 					}
@@ -121,7 +121,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					}
 
 					// Target user is not here
-					if(!array_key_exists($argument[0], $this->irc->users)){
+					if(!array_key_exists($argument[0], $this->bot->users)){
 						$this->irc->sendMessage($channel, "$user: $argument[0] is not here, master");
 						return;
 					}
@@ -136,10 +136,10 @@ class Kickfight_Plugin extends Base_Plugin {
 						}
 					}
 					$this->softban($argument[0], $time);
-					$this->irc->deop($channel, $argument[0]);
+					$this->bot->deop($channel, $argument[0]);
 					$this->irc->sendMessage($channel, "User $argument[0] has been banned for $time seconds by $user");
 				}else{
-					$this->irc->sendMessage($channel, "$user: ".$this->irc->getCommandUsage("softban", USER_LEVEL_GLOBAL));
+					$this->irc->sendMessage($channel, "$user: ".$this->bot->getCommandUsage("softban", USER_LEVEL_GLOBAL));
 					return;
 				}
 				break;
