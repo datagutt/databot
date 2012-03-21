@@ -66,13 +66,12 @@ class Kickfight_Plugin extends Base_Plugin {
 	}
 
 	public function onCommand($message, $command, $user, $channel, $hostmask){
-		$prefix = $this->irc->prefix;
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
+		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
 		switch($command){
-			case $prefix."start":
-			case $prefix."stop":
-			case $prefix."softban":
+			case "start":
+			case "stop":
+			case "softban":
 				if(!$this->irc->isOwner($user, $hostmask)){;
 					$this->irc->sendMessage($channel, "$user: $command can only be called by owners, idiot");
 					return;
@@ -80,7 +79,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				break;
 		}
 		switch($command){
-			case $prefix."start":
+			case "start":
 				// We have already started
 				if($this->enabled){
 					$this->irc->sendMessage($channel, "$user: We have already started, master");
@@ -94,7 +93,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					}
 				}	
 				break;
-			case $prefix."stop":
+			case "stop":
 				if(!$this->enabled){
 					$this->irc->sendMessage($channel, "$user: We have not started yet, master");
 					return;
@@ -107,7 +106,7 @@ class Kickfight_Plugin extends Base_Plugin {
 					}
 				}	
 				break;
-			case $prefix."softban":
+			case "softban":
 				if(is_array($argument) && !empty($argument[0])){
 					// Do not ban ourselves
 					if($argument[0] == $this->irc->nick){

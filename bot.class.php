@@ -1,6 +1,6 @@
 <?php
 // Bot version
-define("VERSION", "0.3");
+define("VERSION", "0.4");
 // Bot name used in VERSION (not nick)
 define("BOT", "Databot");
 
@@ -17,12 +17,12 @@ define("USER_LEVEL_MOD", 2);
 define("USER_LEVEL_OWNER", 3);
 class Bot {
 	public $start_time = 0;
-	public $last_send_time = 0;
+	private $delay_until = 0;
 	public $server,
 		$port = 6667,
 		$name = "Realname",
 		$prefix = "@",
-		$delay = 1,
+		$delay = 0.1,
 		$password;
 	public $channels = array();
 	public $owners = array();
@@ -123,12 +123,12 @@ class Bot {
 			$output = "$action $arg\n";
             
 			// anti flood
-			if ($this->last_send_time > (time() - $this->delay)) {
-				sleep($this->delay);
+			if ($this->delay_until > microtime(true)) {
+				time_sleep_until($this->delay_until);
 			}
 
 			fwrite($this->sock, $output);
-			$this->last_send_time = time();
+			$this->delay_until = microtime(true)+$this->delay;
 		}else{
 			throw new Exception("Not connected to server");
 		}
@@ -152,6 +152,12 @@ class Bot {
 		$this->commands[$command][$level] = array();
 		$this->commands[$command][$level]["description"] = $description;
 		$this->commands[$command][$level]["usage"] = $usage;
+	}
+	public function getCommandMinimumLevel($command){
+		if($this->isCommand($command, USER_LEVEL_OWNER)){
+			$levels = array_keys($this->commands[$command]);
+			return min($levels);
+		}
 	}
 	public function getCommandDescription($command, $level = USER_LEVEL_GLOBAL){
 		if($this->isCommand($command, $level)){
@@ -383,6 +389,7 @@ class Bot {
 							// If theres a prefix at the start of the message, its a command
 							$c = substr($command, 0, strlen($this->prefix));
 							if($c == $this->prefix){
+								$passedVars["command"] = substr($command, strlen($this->prefix));
 								$this->log("[CMD] $user: $message", LOG_LEVEL_CHAT);
 								$this->triggerEvent("command", $passedVars);
 							}else if(!empty($user)){

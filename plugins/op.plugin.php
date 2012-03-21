@@ -22,70 +22,69 @@ class OP_Plugin extends Base_Plugin {
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
-		$prefix = $this->irc->prefix;
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($command, "", $message, $count)));
+		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
 		$userLevel = $this->irc->getUserLevel($user, $hostmask);
 
 		if(!$this->irc->isCommand(substr($command, 1), $userLevel)){
 			return;
 		}
 		switch($command){
-			case $prefix."op":
+			case "op":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->op($channel, $argument[0]);
 				}else{
 					$this->irc->op($channel, $user);
 				}
 			break;
-			case $prefix."deop":
+			case "deop":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->deop($channel, $argument[0]);
 				}else{
 					$this->irc->deop($channel, $user);
 				}
 			break;
-			case $prefix."voice":
+			case "voice":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->voice($channel, $argument[0]);
 				}else{
 					$this->irc->voice($channel, $user);
 				}
 			break;
-			case $prefix."devoice":
+			case "devoice":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->devoice($channel, $argument[0]);
 				}else{
 					$this->irc->devoice($channel, $user);
 				}
-			case $prefix."mute":
+			case "mute":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->mute($channel, $argument[0]);
 				}else{
 					$this->irc->mute($channel, $user);
 				}
 			break;
-			case $prefix."unmute":
+			case "unmute":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->unmute($channel, $argument[0]);
 				}else{
 					$this->irc->unmute($channel, $user);
 				}
 			break;
-			case $prefix."kick":
+			case "kick":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->kick($channel, $argument[0]);
 				}else{
 					$this->irc->kick($channel, $user);
 				}
 			break;
-			case $prefix."kickban":
+			case "kickban":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->ban($channel, $argument[0]);
 					$this->irc->kick($channel, $argument[0]);
 				}
 			break;
-			case $prefix."topic":
+			case "topic":
 				if(is_array($argument)){
 					$topic = "";
 					foreach($argument as $line){
@@ -95,7 +94,7 @@ class OP_Plugin extends Base_Plugin {
 					$this->irc->setTopic($channel, $topic);
 				}
 			break;
-			case $prefix."say":
+			case "say":
 				if(is_array($argument)){
 					$channel = $argument[0];
 					unset($argument[0]);
@@ -109,17 +108,17 @@ class OP_Plugin extends Base_Plugin {
 					$this->irc->sendMessage($channel, $this->irc->getCommandUsage("say", USER_LEVEL_OWNER));
 				}
 			break;
-			case $prefix."nick":
+			case "nick":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->nick($argument[0]);
 				}
 			break;
-			case $prefix."join":
+			case "join":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->send("JOIN", $argument[0]);
 				}
 			break;
-			case $prefix."part":
+			case "part":
 				if(is_array($argument) && !empty($argument[0])){
 					$this->irc->send("PART", $argument[0]);
 				}
