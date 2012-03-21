@@ -23,7 +23,6 @@ class Bot {
 	public $owners = array();
 	public $moderators = array();
 	public $commands = array();
-	public $users = array();
 	public $prefix = "@";
 	public $loop = 10;
 	private $logLevel = LOG_LEVEL_IRC;
@@ -56,10 +55,10 @@ class Bot {
 		$plugins = array_reverse($plugins, true);
 		$plugins["Base_Plugin"] = "base";
 		$plugins = $this->plugins = array_reverse($plugins, true);
-		$this->loadedPlugins["Base_Plugin"] = new Base_Plugin($this->irc->sock, $this, $this->irc);
+		$this->loadedPlugins["Base_Plugin"] = new Base_Plugin($this, $this->irc);
 		foreach($plugins as $class => $plugin){
 			@require_once("plugins/$plugin.plugin.php");
-			$this->loadedPlugins[$class] = new $class($this->irc->sock, $this, $this->irc);
+			$this->loadedPlugins[$class] = new $class($this, $this->irc);
 		}
 	}
 	public function setPluginProperty($plugin, $property, $value){

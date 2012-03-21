@@ -87,7 +87,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = true;
 				$this->irc->sendMessage($channel, "Starting KickFight!");
-				foreach($this->bot->users as $nick => $host){
+				foreach($this->bot->users[$channel]as $nick => $host){
 					if(!$this->isSoftBanned($nick)){
 						$this->bot->op($channel, $nick);
 					}
@@ -100,7 +100,7 @@ class Kickfight_Plugin extends Base_Plugin {
 				}
 				$this->enabled = false;
 				$this->irc->sendMessage($channel, "Stopping KickFight!");
-				foreach ($this->bot->users as $nick => $host) {
+				foreach ($this->bot->users[$channel]as $nick => $host) {
 					if($nick !== $user){
 						$this->bot->deop($channel, $nick);
 					}

@@ -1,11 +1,12 @@
 <?php
 class IRC{
-	public $sock;
 	public $server = "irc.freenode.net",
 		$port = 6667,
 		$nick = "Bot",
 		$name = "Realname",
-		$password;
+		$password,
+		$users = array();
+	public $sock;
 	private $ex;
 	public function __construct($bot){
 		$this->bot = $bot;
@@ -72,6 +73,7 @@ class IRC{
 		$this->send("NICK", "$nick");
 	}
 	public function join($channel){
+		$this->users[$channel] = array();
 		$this->send("JOIN", $channel);
 	}
 	public function part($channel){
@@ -181,21 +183,22 @@ class IRC{
 		if(!empty($message) && substr($message, 0, 1) == chr(1) && substr($message, -1) == chr(1)){
 			$event = "CTCP";
 		}
+		print_r($this->users);
 
 		switch($event){
 			case "JOIN":
 				// Do not add ourselves or services
 				if($user !== $this->nick && $hostname !== "services."){
 					// Add to users array
-					$this->bot->users[$user] = $hostmask;
+					$this->users[$channel][$user] = $hostmask;
 				}
 				$this->bot->log("[JOIN] $user joined $channel", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("join", $passedVars);
 			break;
 			case "PART":
 				// Remove from users array
-				if(array_key_exists($user, $this->irc->users)){
-					unset($this->irc->users[$user]);
+				if(array_key_exists($user, $this->users[$channel])){
+					unset($this->users[$channel][$user]);
 				}
 				$this->bot->log("[PART] $user parted $channel", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("part", $passedVars);
@@ -210,8 +213,8 @@ class IRC{
 				);
 
 				// Rename the user in the users array
-				$this->irc->users[$new] = $this->irc->users[$user];
-				unset($this->irc->users[$user]);
+				$this->users[$channel][$new] = $this->users[$channel][$user];
+				unset($this->users[$channel][$user]);
 				$this->bot->log("[NICK] $user changed nick to $new", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("nick", $passedVars);
 			break;
@@ -244,8 +247,8 @@ class IRC{
 			break;
 			case "KICK":
 				// Remove from users array
-				if(array_key_exists($user, $this->irc->users)){
-					unset($this->irc->users[$user]);
+				if(array_key_exists($user, $this->users[$channel])){
+					unset($this->users[$user][$channel]);
 				}
 				$this->bot->log("[KICK] $user got kicked from $channel", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("kick", $passedVars);
@@ -258,7 +261,7 @@ class IRC{
 					$user = preg_replace("/^[^A-}]+/", "", $user);
 					// Do not add ourselves
 					if($user !== $this->nick){
-						$this->irc->users[$user] = $user;
+						$this->users[$channel][$user] = $user;
 						// Send a request for the hostmask and catch it later
 						$this->send("USERHOST", $user);
 					}
@@ -272,10 +275,10 @@ class IRC{
 					// Remove the +/- away status
 					$hostmask = substr($userhost[1], 1);
 					$hostname = explode("@", $hostmask);
-					$this->bot->users[$user] = $hostmask;
+					$this->users[$channel][$user] = $hostmask;
 					// Do not add services
 					if($hostname[1] == "services."){
-						unset($this->bot->users[$user]);
+						unset($this->users[$channel][$user]);
 					}
 				}
 			break;

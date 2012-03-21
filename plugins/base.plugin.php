@@ -2,8 +2,7 @@
 class Base_Plugin {
 	public $sock;
 	public $bot;
-	public function __construct($sock, $bot, $irc){
-		$this->sock = $sock;
+	public function __construct($bot, $irc){
 		$this->bot = $bot;
 		$this->irc = $irc;
 		$this->setup();
@@ -42,7 +41,7 @@ class Base_Plugin {
 			case "userlevel":
 				if(is_array($argument) && !empty($argument[0])){
 					// Target user is not here
-					if(!array_key_exists($argument[0], $this->bot->users)){
+					if(!array_key_exists($argument[0], $this->irc->users[$channel])){
 						$this->irc->sendMessage($channel, "$user: Unknown user $argument[0]");
 						return;
 					}
