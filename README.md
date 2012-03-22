@@ -1,6 +1,7 @@
 Databot
 =============
 A bot written in PHP.
+At the moment, it only supports IRC, but the bot code and IRC code is separated.
 You can easily extend it using plugins.
 
 Plugins

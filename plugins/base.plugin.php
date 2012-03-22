@@ -1,20 +1,20 @@
 <?php
 class Base_Plugin {
 	public $sock;
-	public $irc;
-	public function __construct($sock, $irc){
-		$this->sock = $sock;
+	public $bot;
+	public function __construct($bot, $irc){
+		$this->bot = $bot;
 		$this->irc = $irc;
 		$this->setup();
 	}
 	public function setup(){
-		if(!$this->irc->isCommand("help")){
-			$this->irc->addCommand("help", "Shows commands and how to use them", "[<command>]", USER_LEVEL_GLOBAL);
+		if(!$this->bot->isCommand("help")){
+			$this->bot->addCommand("help", "Shows commands and how to use them", "[<command>]", USER_LEVEL_GLOBAL);
 		}
-		$this->irc->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("set", "Set a property", "<property> <value>", USER_LEVEL_OWNER);
-		$this->irc->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("set", "Set a property", "<property> <value>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
 	}
 	public function onLoop(){}
 	public function onNick($user, $new, $hostmask){}
@@ -24,15 +24,15 @@ class Base_Plugin {
 	public function onKick($message, $command, $user, $channel, $hostmask){}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
-		$userLevel = $this->irc->getUserLevel($user, $hostmask);
+		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
+		$userLevel = $this->bot->getUserLevel($user, $hostmask);
 
-		if(!$this->irc->isCommand($command, USER_LEVEL_OWNER)){
+		if(!$this->bot->isCommand($command, USER_LEVEL_OWNER)){
 			$this->irc->sendMessage($channel, "$user: Command '$command' does not exist");
 			return; 
 		}
 
-		if($this->irc->getCommandMinimumLevel($command) > $userLevel){
+		if($this->bot->getCommandMinimumLevel($command) > $userLevel){
 			$this->irc->sendMessage($channel, $user.": You are not authorized to perform '$command'");
 			return;
 		}
@@ -41,11 +41,11 @@ class Base_Plugin {
 			case "userlevel":
 				if(is_array($argument) && !empty($argument[0])){
 					// Target user is not here
-					if(!array_key_exists($argument[0], $this->irc->users)){
+					if(!array_key_exists($argument[0], $this->irc->users[$channel])){
 						$this->irc->sendMessage($channel, "$user: Unknown user $argument[0]");
 						return;
 					}
-					$userLevel = $this->irc->getUserLevel($argument[0], $this->irc->users[$argument[0]]);
+					$userLevel = $this->bot->getUserLevel($argument[0], $this->bot->users[$argument[0]]);
 					$this->irc->sendMessage($channel, $user.": $argument[0]'s bot control level is: $userLevel");
 				}else{
 					$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
@@ -57,9 +57,9 @@ class Base_Plugin {
 						if(isset($argument[1])){
 							$arg1 = trim($argument[1]);
 							if($arg1 == "true" || $arg1 == "1"){
-								$this->irc->setPluginProperty("OP_Plugin", "autoOP", true);
+								$this->bot->setPluginProperty("OP_Plugin", "autoOP", true);
 							}else{
-								$this->irc->setPluginProperty("OP_Plugin", "autoOP", false);			}
+								$this->bot->setPluginProperty("OP_Plugin", "autoOP", false);			}
 						}
 					break;
 				}
@@ -70,7 +70,7 @@ class Base_Plugin {
 					"channel" => $channel,
 					"hostmask" => $hostmask
 				);
-				$this->irc->triggerEvent("onSet", $passedVars);
+				$this->bot->triggerEvent("onSet", $passedVars);
 			break;
 			case "owners":
 				if(is_array($argument) && !empty($argument[0])){
@@ -87,15 +87,15 @@ class Base_Plugin {
 						case "add":
 							foreach($owners as $owner){
 								$owner = trim($owner);
-								$this->irc->owners[$owner] = $this->irc->users[$owner];
-								$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$owner]." added to owners list");
+								$this->bot->owners[$owner] = $this->bot->users[$owner];
+								$this->irc->sendMessage($channel, "$user: $owner!".$this->bot->users[$owner]." added to owners list");
 							}
 							break;
 							case "remove":
 								foreach($owners as $owner){
 									$owner = trim($owner);
-									unset($this->irc->owners[$owner]);
-									$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$owner]." removed from owners list");
+									unset($this->bot->owners[$owner]);
+									$this->irc->sendMessage($channel, "$user: $owner!".$this->bot->users[$owner]." removed from owners list");
 								}
 							break;
 							default:
@@ -104,7 +104,7 @@ class Base_Plugin {
 					}
 				}else{
 					$msg = "Owners: ";
-					foreach($this->irc->owners as $owner => $hostmask){
+					foreach($this->bot->owners as $owner => $hostmask){
 						$msg .= $owner;
 						$msg .= " ";
 					}
@@ -126,8 +126,8 @@ class Base_Plugin {
 						case "add":
 							foreach($mods as $mod){
 								$mod = trim($mod);
-								$this->irc->moderators[$mod] = $this->irc->users[$mod];
-								$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$mod]." added to moderators list");
+								$this->bot->moderators[$mod] = $this->bot->users[$mod];
+								$this->irc->sendMessage($channel, "$user: $mod!".$this->bot->users[$mod]." added to moderators list");
 							}
 							break;
 						case "remove":
@@ -143,7 +143,7 @@ class Base_Plugin {
 					}
 				}else{
 					$msg = "Moderators: ";
-					foreach($this->irc->moderators as $moderator => $hostmask){
+					foreach($this->bot->moderators as $moderator => $hostmask){
 						$msg .= $moderator;
 						$msg .= " ";
 					}
@@ -151,32 +151,32 @@ class Base_Plugin {
 				}
 			break;
 			case "ping":
-				$running = round(microtime(true) - $this->irc->start_time);
+				$running = round(microtime(true) - $this->bot->start_time);
 				$commit = @exec("git log -n 1 --pretty=format:'%h'");
 				$this->irc->sendMessage($channel, "$user: ".BOT." version ".VERSION."; commit $commit; uptime ".$running."s.");
 			break;
 			case "help":
 				if(is_array($argument) && !empty($argument[0])){
-					if(!$this->irc->isCommand($argument[0], USER_LEVEL_OWNER)){
+					if(!$this->bot->isCommand($argument[0], USER_LEVEL_OWNER)){
 						$this->irc->sendMessage($channel, "$user: Command '$argument[0]' does not exist");
 						return; 
 					}
-					if($this->irc->getCommandMinimumLevel($argument[0]) > $userLevel){
+					if($this->bot->getCommandMinimumLevel($argument[0]) > $userLevel){
 						$this->irc->sendMessage($channel, $user.": You are not authorized to perform '$argument[0]'");
 						return;
 					}
-					$usage = $this->irc->getCommandUsage($argument[0], $userLevel);
-					$description = $this->irc->getCommandDescription($argument[0], $userLevel);
-					$this->irc->sendMessage($channel, "$user: ".$this->irc->prefix."$argument[0] $usage");
+					$usage = $this->bot->getCommandUsage($argument[0], $userLevel);
+					$description = $this->bot->getCommandDescription($argument[0], $userLevel);
+					$this->irc->sendMessage($channel, "$user: ".$this->bot->prefix."$argument[0] $usage");
 					$this->irc->sendMessage($channel, "$user: $description");
 				}else{
 					$msg = "Available commands: ";
 
-					$userLevel = $this->irc->getUserLevel($user, $hostmask);
+					$userLevel = $this->bot->getUserLevel($user, $hostmask);
 
-					foreach($this->irc->commands as $command => $levels){
-						if($this->irc->isCommand($command, $userLevel)){
-							$msg .= $this->irc->prefix.$command;
+					foreach($this->bot->commands as $command => $levels){
+						if($this->bot->isCommand($command, $userLevel)){
+							$msg .= $this->bot->prefix.$command;
 							$msg .= " ";
 						}
 					}

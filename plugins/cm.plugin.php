@@ -4,8 +4,8 @@ class CM_Plugin extends Base_Plugin {
 	public $devices = array();
 	public function setup(){
 		// Commands
-		$this->irc->addCommand("supported", "Shows supported devices", "[<manufacturer>]", USER_LEVEL_GLOBAL);
-		$this->irc->addCommand("downloads", "Shows download link(s)", "[<device_name>]", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("supported", "Shows supported devices", "[<manufacturer>]", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("downloads", "Shows download link(s)", "[<device_name>]", USER_LEVEL_GLOBAL);
 		
 		// Devices
 		$this->addDevice("samsung", "galaxys2", "GT-I9100", "http://get.cm/?device=galaxys2");
@@ -52,12 +52,12 @@ class CM_Plugin extends Base_Plugin {
 			$this->irc->sendMessage($channel, $user.": NO ETAs");
 		}
 		if(preg_match("/\bmiui\b/iU", $message)){
-			$this->irc->kick($channel, $user, "DO NOT TALK ABOUT THAT SHIT");
+			$this->bot->kick($channel, $user, "DO NOT TALK ABOUT THAT SHIT");
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->irc->prefix.$command, "", $message, $count)));
+		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
 		$msg = "";
 		switch($command){
 			case "supported":
