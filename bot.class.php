@@ -19,7 +19,6 @@ class Bot {
 	public $start_time = 0;
 	public $delay_until = 0;
 	public $delay = 0.3;
-	public $channels = array();
 	public $owners = array();
 	public $moderators = array();
 	public $commands = array();

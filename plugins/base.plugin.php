@@ -24,12 +24,12 @@ class Base_Plugin {
 	public function onKick($message, $command, $user, $channel, $hostmask){}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
+		$argument = explode(" ", trim(substr($message, strlen($this->bot->prefix.$command))));
 		$userLevel = $this->bot->getUserLevel($user, $hostmask);
 
 		if(!$this->bot->isCommand($command, USER_LEVEL_OWNER)){
 			$this->irc->sendMessage($channel, "$user: Command '$command' does not exist");
-			return; 
+			return;
 		}
 
 		if($this->bot->getCommandMinimumLevel($command) > $userLevel){
@@ -40,13 +40,16 @@ class Base_Plugin {
 		switch($command){
 			case "userlevel":
 				if(is_array($argument) && !empty($argument[0])){
-					// Target user is not here
-					if(!array_key_exists($argument[0], $this->irc->users[$channel])){
-						$this->irc->sendMessage($channel, "$user: Unknown user $argument[0]");
+					// Check for target user in our channels
+					foreach($this->irc->users as $userChannel => $users){
+						if(!array_key_exists($argument[0], $this->irc->users[$userChannel])){
+							continue;
+						}
+						$userLevel = $this->bot->getUserLevel($argument[0], $this->irc->users[$userChannel][$argument[0]]);
+						$this->irc->sendMessage($channel, $user.": $argument[0]'s bot control level is: $userLevel");
 						return;
 					}
-					$userLevel = $this->bot->getUserLevel($argument[0], $this->bot->users[$argument[0]]);
-					$this->irc->sendMessage($channel, $user.": $argument[0]'s bot control level is: $userLevel");
+					$this->irc->sendMessage($channel, "$user: Unknown user $argument[0]");
 				}else{
 					$this->irc->sendMessage($channel, $user.": Your bot control level is: $userLevel");
 				}
@@ -87,18 +90,24 @@ class Base_Plugin {
 						case "add":
 							foreach($owners as $owner){
 								$owner = trim($owner);
-								$this->bot->owners[$owner] = $this->bot->users[$owner];
-								$this->irc->sendMessage($channel, "$user: $owner!".$this->bot->users[$owner]." added to owners list");
+								foreach($this->irc->users as $userChannel => $users){
+									if(array_key_exists($owner, $this->irc->users[$userChannel])){
+										$this->bot->owners[$owner] = $this->irc->users[$userChannel][$owner];
+										$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$userChannel][$owner]." added to owners list");
+										return;
+									}
+								}
+								$this->irc->sendMessage($channel, "$user: Unknown user '$owner'");
 							}
 							break;
-							case "remove":
+						case "remove":
 								foreach($owners as $owner){
 									$owner = trim($owner);
 									unset($this->bot->owners[$owner]);
-									$this->irc->sendMessage($channel, "$user: $owner!".$this->bot->users[$owner]." removed from owners list");
+									$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$owner]." removed from owners list");
 								}
 							break;
-							default:
+						default:
 								$this->irc->sendMessage($channel, "$user: Unknown argument '$argument[1]'");
 							break;
 					}
@@ -126,8 +135,14 @@ class Base_Plugin {
 						case "add":
 							foreach($mods as $mod){
 								$mod = trim($mod);
-								$this->bot->moderators[$mod] = $this->bot->users[$mod];
-								$this->irc->sendMessage($channel, "$user: $mod!".$this->bot->users[$mod]." added to moderators list");
+								foreach($this->irc->users as $userChannel => $users){
+									if(array_key_exists($mod, $this->irc->users[$userChannel])){
+										$this->bot->moderators[$mod] = $this->irc->users[$userChannel][$mod];
+										$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$userChannel][$mod]." added to moderators list");
+										return;
+									}
+								}
+								$this->irc->sendMessage($channel, "$user: Unknown user '$mod'");
 							}
 							break;
 						case "remove":

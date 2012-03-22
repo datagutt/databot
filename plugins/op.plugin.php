@@ -25,8 +25,7 @@ class OP_Plugin extends Base_Plugin {
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
-		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
+		$argument = explode(" ", trim(substr($message, strlen($this->bot->prefix.$command))));
 		$userLevel = $this->bot->getUserLevel($user, $hostmask);
 
 		if(!$this->bot->isCommand($command, $userLevel)){

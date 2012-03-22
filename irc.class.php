@@ -5,7 +5,8 @@ class IRC{
 		$nick = "Bot",
 		$name = "Realname",
 		$password,
-		$users = array();
+		$users = array(),
+		$channels = array();
 	public $sock;
 	private $ex;
 	public function __construct($bot){
@@ -30,7 +31,7 @@ class IRC{
 	public function send($action = "CTCP", $arg){
 		if($this->sock){
 			$output = "$action $arg\n";
-            
+
 			// anti flood
 			if ($this->bot->delay_until > microtime(true)) {
 				time_sleep_until($this->bot->delay_until);
@@ -84,16 +85,16 @@ class IRC{
 			trigger_error("sendTopic: No topic or channel given", E_USER_WARNING);
 			return;
 		}
-		// This needs TOPICLOCK to be set OFF on ChanServ 
+		// This needs TOPICLOCK to be set OFF on ChanServ
 		$this->send("TOPIC", "$channel :$topic");
 		$this->bot->log("[TOPIC] $channel topic set to $topic by command", LOG_LEVEL_CHAT);
 	}
-	
+
 	public function sendMessage($target, $message = ""){
 		if(empty($message) || empty($target)){
 			trigger_error("sendMessage: No message or target given", E_USER_WARNING);
 			return;
-		}		
+		}
 		$this->send("PRIVMSG", "$target :$message");
 	}
 	public function sendNotice($target, $message = ""){
@@ -109,13 +110,12 @@ class IRC{
 		if(!empty($this->password)){
 			$this->send("NS", "IDENTIFY ".$this->password."");
 		}else{
-			foreach($this->bot->channels as $channel){
+			foreach($this->channels as $channel){
 				$this->join($channel);
 			}
 		}
 	}
 	public function parse($data){
-	
 		// Trimming
 		if(substr($data, 0, 1) == ":"){
 			$data = substr($data, 1);
@@ -125,7 +125,7 @@ class IRC{
 		echo $data."\n";
 
 		$this->ex = explode(" ", $data);
-		
+
 		list($user, $hostmask, $hostname, $split, $command, $message, $channel) = "";
 		$size = sizeof($this->ex);
 
@@ -171,9 +171,9 @@ class IRC{
 			$this->send("PONG", $this->ex[1]);
 		}
 		if((preg_match("/You are now identified|is now your displayed host|No such nick|password accepted -- you are now recognized/", $data))){
-			foreach($this->bot->channels as $channel){
+			foreach($this->channels as $channel){
 				$this->join($channel);
-			}	
+			}
 		}
 		//ugly 
 		if(!isset($this->ex[1])){
@@ -183,7 +183,6 @@ class IRC{
 		if(!empty($message) && substr($message, 0, 1) == chr(1) && substr($message, -1) == chr(1)){
 			$event = "CTCP";
 		}
-		print_r($this->users);
 
 		switch($event){
 			case "JOIN":
@@ -213,8 +212,10 @@ class IRC{
 				);
 
 				// Rename the user in the users array
-				$this->users[$channel][$new] = $this->users[$channel][$user];
-				unset($this->users[$channel][$user]);
+				foreach($this->users as $channel => $users){
+					$this->users[$channel][$new] = $this->users[$channel][$user];
+					unset($this->users[$channel][$user]);
+				}
 				$this->bot->log("[NICK] $user changed nick to $new", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("nick", $passedVars);
 			break;
@@ -248,7 +249,7 @@ class IRC{
 			case "KICK":
 				// Remove from users array
 				if(array_key_exists($user, $this->users[$channel])){
-					unset($this->users[$user][$channel]);
+					unset($this->users[$channel][$user]);
 				}
 				$this->bot->log("[KICK] $user got kicked from $channel", LOG_LEVEL_CHAT);
 				$this->bot->triggerEvent("kick", $passedVars);
@@ -275,10 +276,14 @@ class IRC{
 					// Remove the +/- away status
 					$hostmask = substr($userhost[1], 1);
 					$hostname = explode("@", $hostmask);
-					$this->users[$channel][$user] = $hostmask;
+					foreach($this->users as $channel => $users){
+						$this->users[$channel][$user] = $hostmask;
+					}
 					// Do not add services
 					if($hostname[1] == "services."){
-						unset($this->users[$channel][$user]);
+						foreach($this->users as $channel => $users){
+							unset($this->users[$channel][$user]);
+						}
 					}
 				}
 			break;

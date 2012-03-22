@@ -52,12 +52,12 @@ class CM_Plugin extends Base_Plugin {
 			$this->irc->sendMessage($channel, $user.": NO ETAs");
 		}
 		if(preg_match("/\bmiui\b/iU", $message)){
-			$this->bot->kick($channel, $user, "DO NOT TALK ABOUT THAT SHIT");
+			$this->irc->kick($channel, $user, "DO NOT TALK ABOUT THAT SHIT");
 		}
 	}
 	public function onCommand($message, $command, $user, $channel, $hostmask){
 		$count = 1;
-		$argument = explode(" ", trim(str_replace($this->bot->prefix.$command, "", $message, $count)));
+		$argument = explode(" ", trim(substr($message, strlen($this->bot->prefix.$command))));
 		$msg = "";
 		switch($command){
 			case "supported":
