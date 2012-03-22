@@ -170,7 +170,7 @@ class IRC{
 		if(isset($this->ex[0]) && isset($this->ex[1]) && $this->ex[0] == "PING"){
 			$this->send("PONG", $this->ex[1]);
 		}
-		if((preg_match("/You are now identified|is now your displayed host|No such nick|password accepted -- you are now recognized/", $data))){
+		if((preg_match("/You are now identified|is now your displayed host|No such nick|password accepted -- you are now recognized/", $data)) && $hostname == "services."){
 			foreach($this->channels as $channel){
 				$this->join($channel);
 			}
