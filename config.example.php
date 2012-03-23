@@ -11,11 +11,11 @@ $bot_conf = array(
 	"moderators" => array(
 		"example" => "~example@example.org"
 	),
-	"channels" => array("#example"),
 	"prefix" => "!"
 );
 $irc_conf = array(
 	"nick" => "bot",
 	"name" => "Bot",
 	"server" => "irc.freenode.net",
+        "channels" => array("#example")
 );

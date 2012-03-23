@@ -76,7 +76,11 @@ class OP_Plugin extends Base_Plugin {
 			break;
 			case "kick":
 				if(is_array($argument) && !empty($argument[0])){
-					$this->irc->kick($channel, $argument[0]);
+					if(!empty($argument[1])){
+						$this->irc->kick($channel, $argument[0], $argument[1]);
+					}else{
+						$this->irc->kick($channel, $argument[0]);
+					}
 				}else{
 					$this->irc->kick($channel, $user);
 				}
