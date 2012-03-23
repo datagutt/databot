@@ -1,2 +1,4 @@
 .DS_Store
 config.local.php
+plugins/ma.plugin.php
+plugins/latest.txt
