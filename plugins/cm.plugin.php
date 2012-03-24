@@ -6,16 +6,19 @@ class CM_Plugin extends Base_Plugin {
 		// Commands
 		$this->bot->addCommand("supported", "Shows supported devices", "[<manufacturer>]", USER_LEVEL_GLOBAL);
 		$this->bot->addCommand("downloads", "Shows download link(s)", "[<device_name>]", USER_LEVEL_GLOBAL);
-		
-		// Devices
-		$this->addDevice("samsung", "galaxys2", "GT-I9100", "http://get.cm/?device=galaxys2");
-		$this->addDevice("samsung", "galaxys", "GT-I9000", "http://get.cm/?device=galaxysmtd");
-		$this->addDevice("samsung", "vibrantmtd", "SGH-T959", "http://get.cm/?device=vibrantmtd");
-		$this->addDevice("samsung", "crespo", "GT-I9020", "http://get.cm/?device=crespo");
-		$this->addDevice("samsung", "maguro", "GT-I9250", "http://get.cm/?device=maguro");
-		$this->addDevice("samsung", "toro", "SCH-I515", "http://get.cm/?device=toro");
-		$this->addDevice("samsung", "captivatemtd", "SGH-I897", "http://get.cm/?device=captivatemtd");
-		$this->addDevice("samsung", "fascinatemtd", "SCH-I500", "http://get.cm/?device=fascinatemtd");
+
+                // Devices
+                $this->addDevice("samsung", "crespo", "GT-I9020", "http://get.cm/?device=crespo");
+                $this->addDevice("samsung", "maguro", "GT-I9250", "http://get.cm/?device=maguro");
+                $this->addDevice("samsung", "toro", "SCH-I515", "http://get.cm/?device=toro");
+                $this->addDevice("samsung", "galaxys2", "GT-I9100", "http://get.cm/?device=galaxys2");
+                $this->addDevice("samsung", "galaxysmtd", "GT-I9000", "http://get.cm/?device=galaxysmtd");
+                $this->addDevice("samsung", "vibrantmtd", "SGH-T959", "http://get.cm/?device=vibrantmtd");
+                $this->addDevice("samsung", "captivatemtd", "SGH-I897", "http://get.cm/?device=captivatemtd");
+                $this->addDevice("samsung", "fascinatemtd", "SCH-I500", "http://get.cm/?device=fascinatemtd");
+                $this->addDevice("samsung", "galaxysbmtd", "GT-I9000B", "http://get.cm/?device=galaxysbmtd");
+                $this->addDevice("samsung", "mesmerizemtd", "SCH-I500", "http://get.cm/?device=mesmerizemtd");
+                $this->addDevice("samsung", "showcasemtd", "SCH-I500", "http://get.cm/?device=showcasemtd");
 	}
 	public function addDevice($manufacturer, $device_name, $device_model, $download_link = DEFAULT_DOWNLOAD_LINK){
 		if(!array_key_exists($manufacturer, $this->devices)){
@@ -88,9 +91,6 @@ class CM_Plugin extends Base_Plugin {
 				}else{
 					$msg = "Downloads: ". DEFAULT_DOWNLOAD_LINK;
 				}
-			break;
-			case "eta":
-				$msg = "NO ETAs";
 			break;
 		}
 		if(!empty($msg)){
