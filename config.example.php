@@ -8,6 +8,9 @@ $bot_conf = array(
 	"owners" => array(
 		"example" => "example@example.org"
 	),
+	"admins" => array(
+		"example" => "example@example.org"
+	},
 	"moderators" => array(
 		"example" => "~example@example.org"
 	),

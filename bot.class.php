@@ -14,12 +14,14 @@ define("LOG_LEVEL_CHAT", 3);
 // User levels
 define("USER_LEVEL_GLOBAL", 1);
 define("USER_LEVEL_MOD", 2);
-define("USER_LEVEL_OWNER", 3);
+define("USER_LEVEL_ADMIN", 3);
+define("USER_LEVEL_OWNER", 4);
 class Bot {
 	public $start_time = 0;
 	public $delay_until = 0;
 	public $delay = 0.3;
 	public $owners = array();
+	public $admins = array();
 	public $moderators = array();
 	public $commands = array();
 	public $prefix = "@";
@@ -112,7 +114,9 @@ class Bot {
 		}
 	}
 	public function addCommand($command, $description, $usage, $level = USER_LEVEL_GLOBAL){
-		$this->commands[$command] = array();
+		if(!isset($this->commands[$command])){
+			$this->commands[$command] = array();
+		}
 		$this->commands[$command][$level] = array();
 		$this->commands[$command][$level]["description"] = $description;
 		$this->commands[$command][$level]["usage"] = $usage;
@@ -153,6 +157,8 @@ class Bot {
 	public function getUserLevel($user, $hostname){
 		if($this->isOwner($user, $hostname)){
 			return USER_LEVEL_OWNER;
+		}elseif($this->isAdmin($user, $hostname)){
+			return USER_LEVEL_ADMIN;
 		}elseif($this->isModerator($user, $hostname)){
 			return USER_LEVEL_MOD;
 		}else{
@@ -161,6 +167,9 @@ class Bot {
 	}
 	public function isOwner($user, $hostname){
 		return array_key_exists($user, $this->owners) && $this->owners[$user] == $hostname;
+	}
+	public function isAdmin($user, $hostname){
+		return array_key_exists($user, $this->admins) && $this->admins[$user] == $hostname;
 	}
 	public function isModerator($user, $hostname){
 		return array_key_exists($user, $this->moderators) && $this->moderators[$user] == $hostname;

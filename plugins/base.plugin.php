@@ -14,7 +14,11 @@ class Base_Plugin {
 		$this->bot->addCommand("userlevel", "Shows a users bot control level", "[<user>]", USER_LEVEL_GLOBAL);
 		$this->bot->addCommand("set", "Set a property", "<property> <value>", USER_LEVEL_OWNER);
 		$this->bot->addCommand("owners", "List owners", "", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("admins", "List admins", "", USER_LEVEL_GLOBAL);
 		$this->bot->addCommand("moderators", "List moderators", "", USER_LEVEL_GLOBAL);
+		$this->bot->addCommand("owners", "List or change owners", "[add/remove] [<user>]", USER_LEVEL_OWNER);
+		$this->bot->addCommand("admins", "List or change admins", "[add/remove] [<user>]", USER_LEVEL_OWNER);
+		$this->bot->addCommand("moderators", "List or change moderators", "[add/remove] [<user>]", USER_LEVEL_ADMIN);
 	}
 	public function onLoop(){}
 	public function onNick($user, $new, $hostmask){}
@@ -85,7 +89,7 @@ class Base_Plugin {
 						$this->irc->sendMessage($channel, "$user: Please specify a user");
 						return;
 					}
-					$owners = explode(",", $argument[1]);
+					$owners = explode(",", substr($message, strlen($this->irc->prefix.$command." ".$argument[0]." ")));
 					switch($argument[0]){
 						case "add":
 							foreach($owners as $owner){
@@ -101,11 +105,11 @@ class Base_Plugin {
 							}
 							break;
 						case "remove":
-								foreach($owners as $owner){
-									$owner = trim($owner);
-									unset($this->bot->owners[$owner]);
-									$this->irc->sendMessage($channel, "$user: $owner!".$this->irc->users[$owner]." removed from owners list");
-								}
+							foreach($owners as $owner){
+								$owner = trim($owner);
+								$this->irc->sendMessage($channel, "$user: $owner!".$this->bot->owners[$owner]." removed from owners list");
+								unset($this->bot->owners[$owner]);
+							}
 							break;
 						default:
 								$this->irc->sendMessage($channel, "$user: Unknown argument '$argument[1]'");
@@ -115,6 +119,51 @@ class Base_Plugin {
 					$msg = "Owners: ";
 					foreach($this->bot->owners as $owner => $hostmask){
 						$msg .= $owner;
+						$msg .= " ";
+					}
+					$this->irc->sendMessage($channel, "$user: $msg");
+				}
+			break;
+			case "admins":
+				if(is_array($argument) && !empty($argument[0])){
+					if($userLevel < USER_LEVEL_OWNER){
+						$this->irc->sendMessage($channel, $user.": You are not authorized to add/remove admins");
+						return;
+					}
+					if(empty($argument[1])){
+						$this->irc->sendMessage($channel, "$user: Please specify a user");
+						return;
+					}
+					$admins = explode(",", substr($message, strlen($this->irc->prefix.$command." ".$argument[0]." ")));
+					switch($argument[0]){
+						case "add":
+							foreach($admins as $admin){
+								$admin = trim($admin);
+								foreach($this->irc->users as $userChannel => $users){
+									if(array_key_exists($admin, $this->irc->users[$userChannel])){
+										$this->bot->owners[$admin] = $this->irc->users[$userChannel][$owner];
+										$this->irc->sendMessage($channel, "$user: $admin!".$this->irc->users[$userChannel][$admin]." added to admin list");
+										return;
+									}
+								}
+								$this->irc->sendMessage($channel, "$user: Unknown user '$admin'");
+							}
+							break;
+						case "remove":
+							foreach($admins as $admin){
+								$admin = trim($admin);
+								$this->irc->sendMessage($channel, "$user: $admin!".$this->bot->admin[$admin]." removed from admin list");
+								unset($this->bot->admins[$admin]);
+							}
+							break;
+						default:
+								$this->irc->sendMessage($channel, "$user: Unknown argument '$argument[1]'");
+							break;
+					}
+				}else{
+					$msg = "Admins: ";
+					foreach($this->bot->admins as $admin => $hostmask){
+						$msg .= $admin;
 						$msg .= " ";
 					}
 					$this->irc->sendMessage($channel, "$user: $msg");
@@ -130,7 +179,7 @@ class Base_Plugin {
 						$this->irc->sendMessage($channel, "$user: Please specify a user");
 						return;
 					}
-					$mods = explode(",", $argument[1]);
+					$mods = explode(",", substr($message, strlen($this->irc->prefix.$command." ".$argument[0]." ")));
 					switch($argument[0]){
 						case "add":
 							foreach($mods as $mod){
@@ -148,12 +197,12 @@ class Base_Plugin {
 						case "remove":
 							foreach($mods as $mod){
 								$mod = trim($mod);
-									unset($this->irc->moderators[$mod]);
-									$this->irc->sendMessage($channel, "$user: $mod!".$this->irc->users[$mod]." removed from moderators list");
-								}
+								$this->irc->sendMessage($channel, "$user: $mod!".$this->bot->moderators[$mod]." removed from moderators list");
+								unset($this->irc->moderators[$mod]);
+							}
 							break;
-							default:
-								$this->irc->sendMessage($channel, "$user: Unknown argument '$argument[1]'");
+						default:
+							$this->irc->sendMessage($channel, "$user: Unknown argument '$argument[1]'");
 							break;
 					}
 				}else{
@@ -174,7 +223,7 @@ class Base_Plugin {
 				if(is_array($argument) && !empty($argument[0])){
 					if(!$this->bot->isCommand($argument[0], USER_LEVEL_OWNER)){
 						$this->irc->sendMessage($channel, "$user: Command '$argument[0]' does not exist");
-						return; 
+						return;
 					}
 					if($this->bot->getCommandMinimumLevel($argument[0]) > $userLevel){
 						$this->irc->sendMessage($channel, $user.": You are not authorized to perform '$argument[0]'");

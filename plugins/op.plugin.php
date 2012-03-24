@@ -9,13 +9,13 @@ class OP_Plugin extends Base_Plugin {
 		$this->bot->addCommand("mute", "Gives voice to the user", "[<user>] [<channel>]", USER_LEVEL_MOD);
 		$this->bot->addCommand("unmute", "Remove voice from the user", "[<user>] [<channel>]", USER_LEVEL_MOD);
 		$this->bot->addCommand("kick", "Kicks the user", "[<user>] [<channel>]", USER_LEVEL_MOD);
-		$this->bot->addCommand("kickban", "Kicks and bans the user", "[<user>] [<channel]", USER_LEVEL_OWNER);
+		$this->bot->addCommand("kickban", "Kicks and bans the user", "[<user>] [<channel]", USER_LEVEL_MOD);
 		$this->bot->addCommand("topic", "Sets the topic", "<topic>", USER_LEVEL_MOD);
 		$this->bot->addCommand("invite", "Invites a user", "<user> [<channel>]", USER_LEVEL_MOD);
-		$this->bot->addCommand("say", "Makes the bot say something", "<channel> <message>", USER_LEVEL_OWNER);
-		$this->bot->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_OWNER);
-		$this->bot->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_OWNER);
-		$this->bot->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_OWNER);
+		$this->bot->addCommand("say", "Makes the bot say something", "<channel> <message>", USER_LEVEL_ADMIN);
+		$this->bot->addCommand("nick", "Changes the nick of the bot", "<nick>", USER_LEVEL_ADMIN);
+		$this->bot->addCommand("join", "Join the specified channel", "<channel>", USER_LEVEL_ADMIN);
+		$this->bot->addCommand("part", "Part the specified channel", "<channel>", USER_LEVEL_ADMIN);
 	}
 	public function onJoin($message, $command, $user, $channel, $hostmask){
 		if($this->autoOP){
