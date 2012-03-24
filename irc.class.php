@@ -70,6 +70,9 @@ class IRC{
 	public function unban($channel, $hostmask){
 		$this->send("MODE", "$channel -b $hostmask");
 	}
+	public function invite($channel, $user){
+		$this->send("INVITE", "$user :$channel");
+	}
 	public function nick($nick){
 		$this->send("NICK", "$nick");
 	}
